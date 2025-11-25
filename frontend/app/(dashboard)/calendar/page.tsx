@@ -143,20 +143,34 @@ export default function CalendarPage() {
             <h1 className="text-2xl sm:text-3xl font-semibold text-white">Kalender</h1>
             <p className="text-slate-300 text-sm">Marketing Termine, Events und Aufgaben</p>
           </div>
-          <Button size="sm" className="bg-white text-slate-900 hover:bg-white/90" onClick={() => openModal({
-            type: "custom",
-            title: "Neue Aktivität",
-            content: (
-              <CalendarCreateForm
-                date={new Date()}
-                companies={companies}
-                onCreate={async (payload) => {
-                  await createEvent(payload)
-                  refresh()
-                }}
-              />
-            )
-          })}>+ Neue Aktivität</Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="glass-card" onClick={() => openModal({
+              type: "custom",
+              title: "Vorlagen",
+              content: (
+                <CalendarTemplates
+                  onCreate={async (payloads) => {
+                    for (const p of payloads) { await createEvent(p as any) }
+                    await refresh()
+                  }}
+                />
+              )
+            })}>Vorlagen</Button>
+            <Button size="sm" className="bg-white text-slate-900 hover:bg-white/90" onClick={() => openModal({
+              type: "custom",
+              title: "Neue Aktivität",
+              content: (
+                <CalendarCreateForm
+                  date={new Date()}
+                  companies={companies}
+                  onCreate={async (payload) => {
+                    await createEvent(payload)
+                    refresh()
+                  }}
+                />
+              )
+            })}>+ Neue Aktivität</Button>
+          </div>
         </div>
       </div>
 
@@ -598,6 +612,117 @@ Hinweis: Bitte relevante Unterlagen mitbringen.`
           }}>
             Erstellen
           </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function CalendarTemplates({ onCreate }: { onCreate: (payloads: any[]) => Promise<void> }) {
+  const [start, setStart] = useState<string>(() => {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + 1); return format(d, 'yyyy-MM-dd')
+  })
+  const [months, setMonths] = useState<number>(3)
+  const [loading, setLoading] = useState(false)
+
+  const nextDow = (from: Date, dow: number) => {
+    const d = new Date(from)
+    const add = (dow - d.getDay() + 7) % 7
+    d.setDate(d.getDate() + add)
+    return d
+  }
+  const addWeeks = (d: Date, w: number) => { const x = new Date(d); x.setDate(x.getDate() + 7 * w); return x }
+  const addMonths = (d: Date, m: number) => { const x = new Date(d); x.setMonth(x.getMonth() + m); return x }
+
+  const genQ1Demand = () => {
+    const s = new Date(start + 'T09:00:00')
+    const end = addMonths(s, months)
+    const items: any[] = []
+    // Weekly promo (Mon), Live webinar (Thu), Follow-up (Fri)
+    const seeds = [
+      { title: 'Webinar Promo Post', dow: 1, color: '#3b82f6' },
+      { title: 'Webinar Live', dow: 4, color: '#a78bfa' },
+      { title: 'Follow-up Email', dow: 5, color: '#10b981' },
+    ]
+    for (const seed of seeds) {
+      const first = nextDow(s, seed.dow) // 0=Sun..6=Sat
+      items.push({
+        title: seed.title,
+        type: 'event',
+        start: format(first, 'yyyy-MM-dd') + 'T10:00:00',
+        end: undefined,
+        color: seed.color,
+        category: 'event',
+        recurrence: { freq: 'weekly' as const, interval: 1, until: format(end, 'yyyy-MM-dd') },
+      })
+    }
+    return items
+  }
+
+  const genContent3M = () => {
+    const s = new Date(start + 'T09:00:00')
+    const end = addMonths(s, months)
+    return [
+      { title: 'Blog Post', type: 'event', start: format(nextDow(s, 2), 'yyyy-MM-dd') + 'T09:00:00', recurrence: { freq: 'weekly' as const, interval: 1, until: format(end, 'yyyy-MM-dd') }, color: '#f59e0b', category: 'event' },
+      { title: 'Newsletter', type: 'event', start: format(nextDow(s, 3), 'yyyy-MM-dd') + 'T11:00:00', recurrence: { freq: 'weekly' as const, interval: 2, until: format(end, 'yyyy-MM-dd') }, color: '#06b6d4', category: 'event' },
+      { title: 'SEO Update', type: 'task', start: format(s, 'yyyy-MM-dd') + 'T13:00:00', recurrence: { freq: 'monthly' as const, interval: 1, count: months }, color: '#ef4444', category: 'event' },
+    ]
+  }
+
+  const genSmmPlan = () => {
+    const s = new Date(start + 'T09:00:00')
+    const end = addMonths(s, months)
+    const posts = [
+      { title: 'IG Carousel', dow: 1, color: '#ec4899' },
+      { title: 'LinkedIn Post', dow: 3, color: '#6366f1' },
+      { title: 'Reel/Shorts', dow: 5, color: '#22c55e' },
+    ]
+    return posts.map(p => ({
+      title: p.title, type: 'event',
+      start: format(nextDow(s, p.dow), 'yyyy-MM-dd') + 'T09:30:00',
+      recurrence: { freq: 'weekly' as const, interval: 1, until: format(end, 'yyyy-MM-dd') },
+      color: p.color, category: 'event'
+    }))
+  }
+
+  const createTemplate = async (key: 'q1' | 'content' | 'smm') => {
+    setLoading(true)
+    try {
+      const packs = key === 'q1' ? genQ1Demand() : key === 'content' ? genContent3M() : genSmmPlan()
+      await onCreate(packs)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 rounded-xl border border-white/15 bg-white/6">
+          <div className="font-semibold text-white mb-1">Q1 Demand Gen</div>
+          <div className="text-sm text-slate-300 mb-3">Еженедельные вебинары + промо/фоллоу‑ап</div>
+          <Button disabled={loading} onClick={()=> createTemplate('q1')} className="w-full">Создать</Button>
+        </div>
+        <div className="p-4 rounded-xl border border-white/15 bg-white/6">
+          <div className="font-semibold text-white mb-1">Контент 3‑месячный</div>
+          <div className="text-sm text-slate-300 mb-3">Блог еженедельно, рассылка раз в 2 недели, SEO — раз в месяц</div>
+          <Button disabled={loading} onClick={()=> createTemplate('content')} className="w-full">Создать</Button>
+        </div>
+        <div className="p-4 rounded-xl border border-white/15 bg-white/6">
+          <div className="font-semibold text-white mb-1">SMM‑план</div>
+          <div className="text-sm text-slate-300 mb-3">Mon/Wed/Fri публикации (IG/LI/Reels)</div>
+          <Button disabled={loading} onClick={()=> createTemplate('smm')} className="w-full">Создать</Button>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid gap-1">
+          <Label>Старт</Label>
+          <Input type="date" value={start} onChange={(e)=> setStart(e.target.value)} />
+        </div>
+        <div className="grid gap-1">
+          <Label>Длительность (мес.)</Label>
+          <Input type="number" min={1} max={12} value={months} onChange={(e)=> setMonths(Number(e.target.value||3))} />
         </div>
       </div>
     </div>

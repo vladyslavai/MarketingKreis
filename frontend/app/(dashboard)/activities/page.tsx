@@ -348,6 +348,7 @@ export default function ActivitiesPage() {
                       <div className="flex items-center gap-2">
                         <Badge className="text-xs" style={{ backgroundColor: getColor(a.category), color: 'white', border: 'none' }}>{a.category}</Badge>
                         <Badge className="bg-white/10 text-slate-200 border-white/20 text-xs">{String(a.status).toUpperCase()}</Badge>
+                        {a?.stage && <Badge className="bg-blue-900/30 text-blue-200 border-blue-800 text-xs">{String(a.stage).toUpperCase()}</Badge>}
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -457,6 +458,8 @@ function AddActivityForm({ onCreate }: { onCreate: (payload: any) => Promise<voi
   const [type, setType] = useState("event")
   const { categories: userCats } = useUserCategories()
   const [category, setCategory] = useState("")
+  const [stage, setStage] = useState<'DRAFT'|'REVIEW'|'PUBLISHED'>('DRAFT')
+  const [checklist, setChecklist] = useState<string[]>([])
   const [description, setDescription] = useState("")
   useEffect(() => {
     if (!category) {
@@ -469,6 +472,29 @@ function AddActivityForm({ onCreate }: { onCreate: (payload: any) => Promise<voi
       <div className="grid gap-1">
         <label className="text-sm">Titel</label>
         <input className="h-10 rounded-md bg-slate-900/60 border border-slate-700 px-3" value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="Titel" />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-1">
+          <label className="text-sm">Workflow</label>
+          <GlassSelect value={stage} onChange={(v:any)=> setStage(v)} options={[
+            { value: 'DRAFT', label: 'Draft' },
+            { value: 'REVIEW', label: 'Review' },
+            { value: 'PUBLISHED', label: 'Publish' },
+          ]} />
+        </div>
+        <div className="grid gap-1">
+          <label className="text-sm">Checklist</label>
+          <div className="flex flex-wrap gap-2">
+            {['Brief','Copy','Design','Approved','Scheduled'].map(item=>(
+              <label key={item} className={`text-xs px-2 py-1 rounded border ${checklist.includes(item)?'bg-green-600/30 border-green-500/40 text-green-100':'bg-slate-800/60 border-slate-700 text-slate-300'}`}>
+                <input type="checkbox" className="mr-1" checked={checklist.includes(item)} onChange={(e)=> {
+                  setChecklist(prev => e.target.checked ? [...prev, item] : prev.filter(x=>x!==item))
+                }} />
+                {item}
+              </label>
+            ))}
+          </div>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-1">
@@ -502,7 +528,7 @@ function AddActivityForm({ onCreate }: { onCreate: (payload: any) => Promise<voi
       </div>
       <div className="flex gap-2 pt-2">
         <Button variant="outline" className="flex-1" onClick={closeModal}>Abbrechen</Button>
-                <Button className="flex-1" onClick={async ()=>{ await onCreate({ title, description, start: `${dateStart}T09:00:00`, end: (dateEnd? `${dateEnd}T18:00:00`: undefined), category, status:'PLANNED', weight:50, budgetCHF:0 }); closeModal(); }}>Erstellen</Button>
+        <Button className="flex-1" onClick={async ()=>{ await onCreate({ title, description, start: `${dateStart}T09:00:00`, end: (dateEnd? `${dateEnd}T18:00:00`: undefined), category, status:'PLANNED', weight:50, budgetCHF:0, stage, checklist }); closeModal(); }}>Erstellen</Button>
       </div>
     </div>
   )
@@ -518,6 +544,8 @@ function EditActivityForm({ activity, onSave }: { activity: any; onSave: (update
   const [status, setStatus] = useState(String(activity.status || 'PLANNED'))
   const [category, setCategory] = useState(String(activity.category || 'VERKAUFSFOERDERUNG'))
   const [description, setDescription] = useState(String(activity.notes || ''))
+  const [stage, setStage] = useState<string>(String(activity.stage || 'DRAFT'))
+  const [checklist, setChecklist] = useState<string[]>(Array.isArray(activity.checklist)? activity.checklist: [])
 
   return (
     <div className="space-y-3 p-2">
@@ -555,9 +583,32 @@ function EditActivityForm({ activity, onSave }: { activity: any; onSave: (update
         <label className="text-sm">Beschreibung</label>
         <textarea className="min-h-[90px] rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2" value={description} onChange={(e)=>setDescription(e.target.value)} placeholder="Kurzbeschreibung" />
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-1">
+          <label className="text-sm">Workflow</label>
+          <GlassSelect value={stage} onChange={(v:any)=> setStage(v)} options={[
+            { value: 'DRAFT', label: 'Draft' },
+            { value: 'REVIEW', label: 'Review' },
+            { value: 'PUBLISHED', label: 'Publish' },
+          ]} />
+        </div>
+        <div className="grid gap-1">
+          <label className="text-sm">Checklist</label>
+          <div className="flex flex-wrap gap-2">
+            {['Brief','Copy','Design','Approved','Scheduled'].map(item=>(
+              <label key={item} className={`text-xs px-2 py-1 rounded border ${checklist.includes(item)?'bg-green-600/30 border-green-500/40 text-green-100':'bg-slate-800/60 border-slate-700 text-slate-300'}`}>
+                <input type="checkbox" className="mr-1" checked={checklist.includes(item)} onChange={(e)=> {
+                  setChecklist(prev => e.target.checked ? [...prev, item] : prev.filter(x=>x!==item))
+                }} />
+                {item}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
       <div className="flex gap-2 pt-2">
         <Button variant="outline" className="flex-1" onClick={closeModal}>Abbrechen</Button>
-        <Button className="flex-1" onClick={async ()=>{ await onSave({ title, notes: description, status, category, start: `${dateStart}T09:00:00`, end: (dateEnd? `${dateEnd}T18:00:00`: undefined) }); closeModal(); }}>Speichern</Button>
+        <Button className="flex-1" onClick={async ()=>{ await onSave({ title, notes: description, status, category, start: `${dateStart}T09:00:00`, end: (dateEnd? `${dateEnd}T18:00:00`: undefined), stage, checklist }); closeModal(); }}>Speichern</Button>
       </div>
     </div>
   )

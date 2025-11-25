@@ -12,3 +12,31 @@ __pycache__/
 *.pyc
 .env
 *.env
+#
+# Frontend artifacts
+#
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+
+#
+# Local runtime logs and PIDs
+#
+backend-dev.log
+frontend-dev.log
+backend_dev.pid
+frontend_dev.pid
+
+#
+# SQLite databases (do not commit local DBs)
+#
+backend/app.db
+backend/app.db-journal
+backend/*.sqlite
+backend/*.sqlite3
+
+#
+# Misc caches/uploads
+#
+.cache/
+uploads/

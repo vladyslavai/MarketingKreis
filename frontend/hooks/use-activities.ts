@@ -24,6 +24,8 @@ export function useActivities() {
 
     // Local cache to persist the exact chosen category names per activity id.
     const CAT_STORAGE_KEY = 'mk_activity_categories'
+    const STAGE_STORAGE_KEY = 'mk_activity_stage'
+    const CL_STORAGE_KEY = 'mk_activity_checklists'
     const loadCategoryMap = (): Record<string, string> => {
         if (typeof window === 'undefined') return {}
         try { return JSON.parse(localStorage.getItem(CAT_STORAGE_KEY) || '{}') } catch { return {} }
@@ -43,11 +45,58 @@ export function useActivities() {
         if (map[id]) { delete map[id]; saveCategoryMap(map) }
     }
 
+    // Stage (Draft -> Review -> Publish)
+    const loadStageMap = (): Record<string, string> => {
+        if (typeof window === 'undefined') return {}
+        try { return JSON.parse(localStorage.getItem(STAGE_STORAGE_KEY) || '{}') } catch { return {} }
+    }
+    const saveStageMap = (map: Record<string, string>) => {
+        if (typeof window === 'undefined') return
+        try { localStorage.setItem(STAGE_STORAGE_KEY, JSON.stringify(map)) } catch {}
+    }
+    const setActivityStage = (id: string, stage?: string) => {
+        if (!id || !stage) return
+        const map = loadStageMap()
+        map[id] = stage
+        saveStageMap(map)
+    }
+    const removeActivityStage = (id: string) => {
+        const map = loadStageMap()
+        if (map[id]) { delete map[id]; saveStageMap(map) }
+    }
+
+    // Checklists
+    const loadChecklists = (): Record<string, string[]> => {
+        if (typeof window === 'undefined') return {}
+        try { return JSON.parse(localStorage.getItem(CL_STORAGE_KEY) || '{}') } catch { return {} }
+    }
+    const saveChecklists = (map: Record<string, string[]>) => {
+        if (typeof window === 'undefined') return
+        try { localStorage.setItem(CL_STORAGE_KEY, JSON.stringify(map)) } catch {}
+    }
+    const setActivityChecklist = (id: string, list?: string[]) => {
+        if (!id) return
+        const map = loadChecklists()
+        if (list && list.length) map[id] = Array.from(new Set(list))
+        else delete map[id]
+        saveChecklists(map)
+    }
+
     // Merge categories from cache to ensure rendering on the selected ring
     const activities: Activity[] = (() => {
         const list: any[] = Array.isArray(data) ? (data as any[]) : []
         const cats = loadCategoryMap()
-        return list.map((a) => ({ ...a, category: cats[String(a.id)] || a.category })) as Activity[]
+        const stages = loadStageMap()
+        const cls = loadChecklists()
+        return list.map((a) => ({
+            ...a,
+            category: cats[String(a.id)] || a.category,
+            // attach local workflow metadata
+            // @ts-ignore
+            stage: (stages[String(a.id)] as any) || (a as any).stage || 'DRAFT',
+            // @ts-ignore
+            checklist: (cls[String(a.id)] as any) || (a as any).checklist || [],
+        })) as any
     })()
 
     const addActivity = React.useCallback(async (activity: Omit<Activity, "id">) => {
@@ -55,7 +104,11 @@ export function useActivities() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const created = await res.json().catch(() => null)
         // Persist chosen category even if backend normalizes it
-        if (created?.id && (activity as any).category) setActivityCategory(String(created.id), String((activity as any).category))
+        if (created?.id) {
+            if ((activity as any).category) setActivityCategory(String(created.id), String((activity as any).category))
+            if ((activity as any).stage) setActivityStage(String(created.id), String((activity as any).stage))
+            if ((activity as any).checklist) setActivityChecklist(String(created.id), (activity as any).checklist as any)
+        }
         await mutate()
         sync.emit('activities:changed')
         return created
@@ -65,7 +118,9 @@ export function useActivities() {
         const res = await authFetch(`/activities/${activityId}`, { method: "PUT", body: JSON.stringify(updates) })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const updated = await res.json().catch(() => null)
-        if (updates.category) setActivityCategory(String(activityId), String(updates.category))
+        if ((updates as any).category) setActivityCategory(String(activityId), String((updates as any).category))
+        if ((updates as any).stage) setActivityStage(String(activityId), String((updates as any).stage))
+        if ((updates as any).checklist) setActivityChecklist(String(activityId), (updates as any).checklist as any)
         await mutate()
         sync.emit('activities:changed')
         return updated
@@ -75,6 +130,12 @@ export function useActivities() {
         const res = await authFetch(`/activities/${activityId}`, { method: "DELETE" })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         removeActivityCategory(String(activityId))
+        removeActivityStage(String(activityId))
+        const cls = loadChecklists()
+        if (cls[String(activityId)]) {
+            delete cls[String(activityId)]
+            saveChecklists(cls)
+        }
         await mutate()
         sync.emit('activities:changed')
     }, [mutate])
