@@ -1,0 +1,14 @@
+node_modules/
+**/node_modules/**
+**/node_modules.bak.*/**
+.next/
+out/
+dist/
+build/
+*.log
+backups/**
+venv/
+__pycache__/
+*.pyc
+.env
+*.env
