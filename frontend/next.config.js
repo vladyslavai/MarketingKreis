@@ -19,12 +19,13 @@ const nextConfig = {
     return config
   },
   async rewrites() {
-    // Always use local backend for development
+    // Only rewrite to local backend during development
+    if (process.env.NODE_ENV !== 'development') {
+      return []
+    }
     const backend = process.env.BACKEND_URL || 'http://127.0.0.1:8000'
     console.log('Using backend URL:', backend)
-    return [
-      { source: '/api/:path*', destination: `${backend}/:path*` },
-    ]
+    return [{ source: '/api/:path*', destination: `${backend}/:path*` }]
   },
 }
 
