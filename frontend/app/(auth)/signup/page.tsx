@@ -1,9 +1,8 @@
-\"use client\"
-import { useState } from \"react\"
-import { useRouter, useSearchParams } from \"next/navigation\"
+"use client"
+import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 
 export default function SignupPage() {
-  const router = useRouter()
   const params = useSearchParams()
   const [email, setEmail] = useState(\"\")
   const [password, setPassword] = useState(\"\")
