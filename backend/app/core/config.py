@@ -58,6 +58,17 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o-mini", env="OPENAI_MODEL")
 
+    # Auth & signup
+    signup_mode: str = Field(default="invite_only", env="SIGNUP_MODE")  # invite_only | open
+    default_role: str = Field(default="user", env="DEFAULT_ROLE")
+
+    # SMTP (optional)
+    smtp_host: Optional[str] = Field(default=None, env="SMTP_HOST")
+    smtp_port: Optional[int] = Field(default=None, env="SMTP_PORT")
+    smtp_user: Optional[str] = Field(default=None, env="SMTP_USER")
+    smtp_pass: Optional[str] = Field(default=None, env="SMTP_PASS")
+    email_from: Optional[str] = Field(default=None, env="EMAIL_FROM")
+
     @validator("jwt_secret_key")
     def validate_jwt_secret(cls, v: str, values: dict) -> str:
         """Ensure JWT secret is strong in production"""

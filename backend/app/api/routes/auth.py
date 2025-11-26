@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, Request
 import json
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from app.db.session import get_db_session
 from app.core.config import get_settings
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from jose import jwt
+from app.models.user import User, UserRole
+import bcrypt
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,12 +18,7 @@ class LoginRequest(BaseModel):
 
 
 def create_jwt(subject: str, secret: str, algorithm: str, minutes: int) -> str:
-    payload = {"sub": subject}
-    try:
-        from datetime import datetime, timezone
-        payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=minutes)
-    except Exception:
-        pass
+    payload = {"sub": subject, "exp": datetime.now(timezone.utc) + timedelta(minutes=minutes)}
     return jwt.encode(payload, secret, algorithm=algorithm)
 
 
@@ -69,14 +66,25 @@ async def login(request: Request, response: Response, db: Session = Depends(get_
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
 
+    # Verify user and password
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not user.hashed_password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    try:
+        valid = bcrypt.checkpw(password.encode("utf-8"), user.hashed_password.encode("utf-8"))
+    except Exception:
+        valid = False
+    if not valid:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
     access_token = create_jwt(
-        subject=email,
+        subject=str(user.id),
         secret=settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
         minutes=settings.access_token_expire_minutes,
     )
     refresh_token = create_jwt(
-        subject=email,
+        subject=str(user.id),
         secret=settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
         minutes=settings.refresh_token_expire_minutes,
@@ -109,7 +117,134 @@ async def login(request: Request, response: Response, db: Session = Depends(get_
 
     # Redirect hint for frontend
     response.headers["X-Redirect-To"] = "/dashboard"
+    role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
+    return {"message": "ok", "user": {"id": user.id, "email": user.email, "role": role_value}}
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str = Field(min_length=6)
+    name: str | None = None
+    token: str | None = None  # invite token when invite_only
+
+def _hash_password(pw: str) -> str:
+    return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode("utf-8")
+
+def _encode_special(payload: dict, minutes: int) -> str:
+    settings = get_settings()
+    return jwt.encode(
+        {
+            **payload,
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=minutes),
+        },
+        settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm,
+    )
+
+def _decode_special(token: str) -> dict:
+    settings = get_settings()
+    return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+
+@router.post("/register")
+def register(body: RegisterRequest, response: Response, db: Session = Depends(get_db_session)):
+    settings = get_settings()
+    # Invite enforcement
+    invited_role = settings.default_role
+    if settings.signup_mode == "invite_only":
+        if not body.token:
+            raise HTTPException(status_code=400, detail="Invite token required")
+        try:
+            data = _decode_special(body.token)
+            if data.get("typ") != "invite":
+                raise HTTPException(status_code=400, detail="Invalid invite token")
+            invited_email = data.get("email")
+            invited_role = data.get("role") or settings.default_role
+            if invited_email and invited_email.lower() != body.email.lower():
+                raise HTTPException(status_code=400, detail="Invite email mismatch")
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid or expired invite token")
+
+    existing = db.query(User).filter(User.email == body.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+    try:
+        role = UserRole(invited_role)
+    except Exception:
+        role = UserRole.user
+    user = User(email=body.email, hashed_password=_hash_password(body.password), role=role)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    # Auto-login
+    access_token = create_jwt(str(user.id), settings.jwt_secret_key, settings.jwt_algorithm, settings.access_token_expire_minutes)
+    refresh_token = create_jwt(str(user.id), settings.jwt_secret_key, settings.jwt_algorithm, settings.refresh_token_expire_minutes)
+    response.set_cookie(settings.cookie_access_name, access_token, httponly=True, secure=settings.cookie_secure, samesite=settings.cookie_samesite, path="/", domain=settings.cookie_domain, max_age=settings.access_token_expire_minutes*60)
+    response.set_cookie(settings.cookie_refresh_name, refresh_token, httponly=True, secure=settings.cookie_secure, samesite=settings.cookie_samesite, path="/", domain=settings.cookie_domain, max_age=settings.refresh_token_expire_minutes*60)
+    role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
+    return {"id": user.id, "email": user.email, "role": role_value}
+
+@router.get("/profile")
+def profile(request: Request, db: Session = Depends(get_db_session)):
+    # import lazily to avoid circular
+    from app.api.deps import get_current_user
+    user = get_current_user(request, db)
+    role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
+    return {"id": user.id, "email": user.email, "role": role_value}
+
+@router.post("/logout")
+def logout(response: Response):
+    settings = get_settings()
+    # Clear cookies
+    response.delete_cookie(settings.cookie_access_name, path="/", domain=settings.cookie_domain)
+    response.delete_cookie(settings.cookie_refresh_name, path="/", domain=settings.cookie_domain)
     return {"message": "ok"}
 
+class InviteRequest(BaseModel):
+    email: str
+    role: str | None = None
+    expires_minutes: int = 60 * 24 * 7  # 7 days
+
+@router.post("/invite")
+def create_invite(body: InviteRequest, request: Request, db: Session = Depends(get_db_session)):
+    # Only admins
+    from app.api.deps import require_role
+    require_role(UserRole.admin)(request, db)  # will raise if not admin
+    settings = get_settings()
+    role = body.role or settings.default_role
+    token = _encode_special({"typ": "invite", "email": body.email, "role": role}, minutes=body.expires_minutes)
+    return {"token": token, "link": f"/signup?token={token}"}
+
+class ResetRequest(BaseModel):
+    email: str
+
+class ResetConfirmRequest(BaseModel):
+    token: str
+    new_password: str = Field(min_length=6)
+
+@router.post("/request-reset")
+def request_reset(body: ResetRequest):
+    token = _encode_special({"typ": "reset", "email": body.email}, minutes=60)
+    return {"token": token}
+
+@router.post("/reset")
+def reset_password(body: ResetConfirmRequest, db: Session = Depends(get_db_session)):
+    try:
+        data = _decode_special(body.token)
+        if data.get("typ") != "reset":
+            raise HTTPException(status_code=400, detail="Invalid token")
+        email = data.get("email")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.hashed_password = _hash_password(body.new_password)
+    db.add(user)
+    db.commit()
+    return {"message": "password_updated"}
 
 
