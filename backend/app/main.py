@@ -17,6 +17,7 @@ from app.api.routes import jobs as jobs_routes
 from app.db.base import Base
 from app.db.session import engine
 from app.core.security import CSRFMiddleware
+import os
 
 
 def create_app() -> FastAPI:
@@ -25,7 +26,10 @@ def create_app() -> FastAPI:
 
     # Trusted hosts (prod hardening)
     if settings.environment == "production":
-        app.add_middleware(TrustedHostMiddleware, allowed_hosts=["marketingkreis.ch", "app.marketingkreis.ch", ".marketingkreis.ch", "localhost", "127.0.0.1"])
+        default_hosts = ["marketingkreis.ch", "app.marketingkreis.ch", ".marketingkreis.ch", "localhost", "127.0.0.1"]
+        extra_hosts = [h.strip() for h in os.getenv("ALLOWED_HOSTS", ".onrender.com,.vercel.app").split(",") if h.strip()]
+        allowed_hosts = list(dict.fromkeys(default_hosts + extra_hosts))
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
     # CORS
     origins = [o.strip() for o in settings.backend_cors_origins.split(',') if o.strip()]
