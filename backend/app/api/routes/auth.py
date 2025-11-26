@@ -8,6 +8,7 @@ from datetime import timedelta, datetime, timezone
 from jose import jwt
 from app.models.user import User, UserRole
 import bcrypt
+from app.utils.mailer import send_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -181,9 +182,18 @@ def register(body: RegisterRequest, response: Response, db: Session = Depends(ge
 
     # Generate email verification token
     verify_token = _encode_special({"typ": "verify", "email": user.email}, minutes=60*24*3)
-    # TODO: send via SMTP if configured; for now return token to frontend
+    # Send email if SMTP configured
+    verify_link_front = (settings.frontend_url or "").rstrip("/") + f"/verify?token={verify_token}" if settings.frontend_url else None
+    subject = "Verify your email"
+    text = f"Welcome! Please confirm your email by opening this link: {verify_link_front or ('/verify?token=' + verify_token)}"
+    html = f"<p>Welcome!</p><p>Please confirm your email by clicking: <a href=\"{verify_link_front or ('/verify?token=' + verify_token)}\">Verify email</a></p>"
+    sent = False
+    try:
+        sent = send_email(user.email, subject, text, html)
+    except Exception:
+        sent = False
     role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
-    return {"id": user.id, "email": user.email, "role": role_value, "verify": {"token": verify_token}}
+    return {"id": user.id, "email": user.email, "role": role_value, "verify": {"token": verify_token, "sent": sent}}
 
 @router.get("/profile")
 def profile(request: Request, db: Session = Depends(get_db_session)):
@@ -225,8 +235,18 @@ class ResetConfirmRequest(BaseModel):
 
 @router.post("/request-reset")
 def request_reset(body: ResetRequest):
+    settings = get_settings()
     token = _encode_special({"typ": "reset", "email": body.email}, minutes=60)
-    return {"token": token}
+    link_front = (settings.frontend_url or "").rstrip("/") + f"/reset?token={token}" if settings.frontend_url else None
+    subject = "Password reset"
+    text = f"Use the following link to reset your password: {link_front or ('/reset?token=' + token)}"
+    html = f"<p>Reset your password:</p><p><a href=\"{link_front or ('/reset?token=' + token)}\">Reset password</a></p>"
+    sent = False
+    try:
+        sent = send_email(body.email, subject, text, html)
+    except Exception:
+        sent = False
+    return {"token": token, "sent": sent}
 
 @router.post("/reset")
 def reset_password(body: ResetConfirmRequest, db: Session = Depends(get_db_session)):

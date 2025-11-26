@@ -68,6 +68,7 @@ class Settings(BaseSettings):
     smtp_user: Optional[str] = Field(default=None, env="SMTP_USER")
     smtp_pass: Optional[str] = Field(default=None, env="SMTP_PASS")
     email_from: Optional[str] = Field(default=None, env="EMAIL_FROM")
+    frontend_url: Optional[str] = Field(default=None, env="FRONTEND_URL")
 
     @validator("jwt_secret_key")
     def validate_jwt_secret(cls, v: str, values: dict) -> str:
