@@ -29,7 +29,9 @@ def create_app() -> FastAPI:
         default_hosts = ["marketingkreis.ch", "app.marketingkreis.ch", ".marketingkreis.ch", "localhost", "127.0.0.1"]
         extra_hosts = [h.strip() for h in os.getenv("ALLOWED_HOSTS", ".onrender.com,.vercel.app").split(",") if h.strip()]
         allowed_hosts = list(dict.fromkeys(default_hosts + extra_hosts))
-        app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+        # If wildcard present, skip TrustedHostMiddleware to avoid 400s from internal health checks
+        if "*" not in allowed_hosts:
+            app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
     # CORS
     origins = [o.strip() for o in settings.backend_cors_origins.split(',') if o.strip()]
