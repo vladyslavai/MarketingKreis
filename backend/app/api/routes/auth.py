@@ -76,6 +76,8 @@ async def login(request: Request, response: Response, db: Session = Depends(get_
         valid = False
     if not valid:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    if not getattr(user, "is_verified", True):
+        raise HTTPException(status_code=403, detail="Email not verified")
 
     access_token = create_jwt(
         subject=str(user.id),
@@ -147,7 +149,7 @@ def _decode_special(token: str) -> dict:
 @router.post("/register")
 def register(body: RegisterRequest, response: Response, db: Session = Depends(get_db_session)):
     settings = get_settings()
-    # Invite enforcement
+    # Mode enforcement
     invited_role = settings.default_role
     if settings.signup_mode == "invite_only":
         if not body.token:
@@ -177,13 +179,11 @@ def register(body: RegisterRequest, response: Response, db: Session = Depends(ge
     db.commit()
     db.refresh(user)
 
-    # Auto-login
-    access_token = create_jwt(str(user.id), settings.jwt_secret_key, settings.jwt_algorithm, settings.access_token_expire_minutes)
-    refresh_token = create_jwt(str(user.id), settings.jwt_secret_key, settings.jwt_algorithm, settings.refresh_token_expire_minutes)
-    response.set_cookie(settings.cookie_access_name, access_token, httponly=True, secure=settings.cookie_secure, samesite=settings.cookie_samesite, path="/", domain=settings.cookie_domain, max_age=settings.access_token_expire_minutes*60)
-    response.set_cookie(settings.cookie_refresh_name, refresh_token, httponly=True, secure=settings.cookie_secure, samesite=settings.cookie_samesite, path="/", domain=settings.cookie_domain, max_age=settings.refresh_token_expire_minutes*60)
+    # Generate email verification token
+    verify_token = _encode_special({"typ": "verify", "email": user.email}, minutes=60*24*3)
+    # TODO: send via SMTP if configured; for now return token to frontend
     role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
-    return {"id": user.id, "email": user.email, "role": role_value}
+    return {"id": user.id, "email": user.email, "role": role_value, "verify": {"token": verify_token}}
 
 @router.get("/profile")
 def profile(request: Request, db: Session = Depends(get_db_session)):
@@ -246,5 +246,24 @@ def reset_password(body: ResetConfirmRequest, db: Session = Depends(get_db_sessi
     db.add(user)
     db.commit()
     return {"message": "password_updated"}
+
+@router.get("/verify")
+def verify_email(token: str, db: Session = Depends(get_db_session)):
+    try:
+        data = _decode_special(token)
+        if data.get("typ") != "verify":
+            raise HTTPException(status_code=400, detail="Invalid token")
+        email = data.get("email")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_verified = True
+    db.add(user)
+    db.commit()
+    return {"message": "verified"}
 
 
