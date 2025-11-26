@@ -77,13 +77,13 @@ export default function CalendarPage() {
       title: e.title,
       category: (e as any).category ? String((e as any).category) as any : ("KUNDENPFLEGE" as const),
       status: "ACTIVE" as const,
-      weight: 1,
-      budgetCHF: 0,
-      expectedLeads: 0,
+    weight: 1,
+    budgetCHF: 0,
+    expectedLeads: 0,
       start: new Date(e.start),
       end: e.end ? new Date(e.end) : undefined,
-      ownerId: undefined,
-      owner: undefined,
+    ownerId: undefined,
+    owner: undefined,
       notes: (e as any).description || (e as any).notes,
       // @ts-ignore
       color: (e as any)?.color
@@ -175,7 +175,7 @@ export default function CalendarPage() {
       </div>
 
       <div>
-        <SimpleCalendar
+          <SimpleCalendar
             activities={activities}
             onCreateActivity={(date: Date) => {
               openModal({
@@ -284,8 +284,8 @@ export default function CalendarPage() {
                 <Line dataKey="done" stroke="#10b981" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
       </div>
     </div>
   )
@@ -578,8 +578,8 @@ Hinweis: Bitte relevante Unterlagen mitbringen.`
           <div className="grid gap-2">
             <Label>Bis (optional)</Label>
             <Input type="date" value={recUntil} onChange={(e)=> setRecUntil(e.target.value)} />
-          </div>
-        </div>
+                  </div>
+                                </div>
 
         {/* Color picker */}
         <div className="grid gap-2">
