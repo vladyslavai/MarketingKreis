@@ -341,7 +341,7 @@ export default function CRMPage() {
       <div className="p-6 space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Tabs Navigation */}
-          <TabsList className="glass-card border rounded-xl p-1">
+          <TabsList className="glass-card border rounded-xl p-1 flex flex-wrap gap-2">
             <TabsTrigger 
               value="companies" 
               className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-slate-800/80 data-[state=active]:shadow-sm rounded-lg px-4 py-2"

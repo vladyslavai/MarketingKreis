@@ -223,7 +223,7 @@ export default function SimpleCalendarView({
                 <div
                   key={`cell-${day.toISOString()}`}
                   className={cn(
-                    "group relative min-h-[80px] sm:min-h-[100px] lg:min-h-[120px] p-1 sm:p-2 border rounded-md sm:rounded-lg transition-colors cursor-pointer backdrop-blur-sm",
+                    "group relative min-h-[76px] xs:min-h-[86px] sm:min-h-[100px] lg:min-h-[120px] p-1 sm:p-2 border rounded-md sm:rounded-lg transition-colors cursor-pointer backdrop-blur-sm",
                     isCurrentMonth ? "bg-white/5 dark:bg-neutral-900/40 border-white/10" : "bg-white/3 dark:bg-neutral-900/20 border-white/5",
                     isToday(day) && "ring-2 ring-blue-500/50 ring-inset",
                     "hover:bg-white/10 hover:border-white/20"
@@ -235,7 +235,7 @@ export default function SimpleCalendarView({
                 >
                   <div className="flex items-center justify-between mb-1 sm:mb-2">
                     <span className={cn(
-                      "text-xs sm:text-sm font-medium",
+                      "text-[11px] xs:text-xs sm:text-sm font-medium",
                       !isCurrentMonth && "text-muted-foreground",
                       isToday(day) && "text-blue-400 font-bold"
                     )}>
@@ -245,7 +245,7 @@ export default function SimpleCalendarView({
                       aria-label="add-event"
                       variant="ghost"
                       size="icon"
-                      className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 hover:opacity-100 text-slate-300 hover:text-white bg-transparent"
+                      className="h-5 w-5 p-0 opacity-100 sm:opacity-0 group-hover:opacity-100 hover:opacity-100 text-slate-300 hover:text-white bg-transparent"
                       onClick={(e) => {
                         e.stopPropagation()
                         onCreateActivity?.(day)
@@ -264,7 +264,7 @@ export default function SimpleCalendarView({
                       return (
                         <div
                           key={activity.id}
-                          className="relative p-1 rounded text-xs cursor-pointer transition-all hover:opacity-100 bg-opacity-90 hover:bg-opacity-100 shadow-sm"
+                          className="relative p-1 rounded text-[11px] sm:text-xs cursor-pointer transition-all hover:opacity-100 bg-opacity-90 hover:bg-opacity-100 shadow-sm"
                           style={{ backgroundColor: bgColor, borderLeft: `3px solid ${primaryColor}` }}
                           onClick={(e) => {
                             e.stopPropagation()
@@ -333,7 +333,7 @@ export default function SimpleCalendarView({
                           return (
                             <div
                               key={`popover-${activity.id}`}
-                              className="p-1 rounded text-xs cursor-pointer shadow-sm"
+                              className="p-1 rounded text-[11px] sm:text-xs cursor-pointer shadow-sm"
                               style={{ backgroundColor: bgColor, borderLeft: `3px solid ${primaryColor}` }}
                               onClick={(e)=>{ e.stopPropagation(); handleActivityClick(activity) }}
                             >

@@ -28,16 +28,36 @@ interface RadialCircleProps {
 }
 
 export default function RadialCircle({ activities, size = 600, year = new Date().getFullYear(), onActivityClick, categories, onActivityUpdate }: RadialCircleProps) {
-  const radius = size / 2 - 60
-  const center = size / 2
-  const months = 12
-  const svgRef = React.useRef<SVGSVGElement | null>(null)
+  // Responsive render size (fits container; capped by provided size)
   const wrapRef = React.useRef<HTMLDivElement | null>(null)
+  const svgRef = React.useRef<SVGSVGElement | null>(null)
+  const [renderSize, setRenderSize] = React.useState<number>(size)
+  React.useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    const ro = new (window as any).ResizeObserver?.((entries: any[]) => {
+      const w = Math.max(240, Math.floor(entries[0].contentRect.width))
+      setRenderSize(Math.min(size, w))
+    })
+    if (ro) { ro.observe(el); return () => ro.disconnect() }
+  }, [size])
+  const rs = renderSize
+  const isSmall = rs < 520
+  const isTiny = rs < 360
+  const scale = rs / 700 // baseline tuning
+  const sw = (v: number) => Math.max(1, v * Math.max(0.8, scale))
+  const fs = (v: number) => Math.max(8, Math.round(v * Math.max(0.85, scale)))
+
+  const radius = rs / 2 - (isSmall ? 44 * Math.max(0.9, scale) : 60 * Math.max(0.9, scale))
+  const center = rs / 2
+  const months = 12
 
   // Normalize category names so lookups are stable regardless of case/whitespace
   const normalizeCategoryName = React.useCallback((name?: string) => String(name ?? "").trim().toUpperCase(), [])
 
-  const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+  const monthNamesFull = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+  const monthNamesTiny = ['J','F','M','A','M','J','J','A','S','O','N','D']
+  const monthNames = isTiny ? monthNamesTiny : monthNamesFull
   const weeksInYear = getISOWeeksInYear(new Date(year, 0, 4))
 
   const getAngle = (date?: Date) => {
@@ -150,18 +170,18 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
   }
 
   const fmt = (d?: Date) => (d ? d.toLocaleDateString?.() : '')
-  const popupW = 220
-  const popupH = 110
+  const popupW = isSmall ? 200 : 220
+  const popupH = isSmall ? 100 : 110
   const positionPopupNear = (x: number, y: number, w: number = popupW, h: number = popupH) => {
     // default show above-right
     let px = x + 14
     let py = y - h - 12
     // flip horizontally if overflow
-    if (px + w > size) px = x - w - 14
+    if (px + w > rs) px = x - w - 14
     if (px < 0) px = 0
     // flip vertically if overflow
     if (py < 0) py = y + 12
-    if (py + h > size) py = size - h - 4
+    if (py + h > rs) py = rs - h - 4
     return { px, py }
   }
 
@@ -177,8 +197,8 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
   // (not needed now) convert screen to local SVG coords
 
   return (
-    <div ref={wrapRef} style={{ position: 'relative', width: size, height: size }}>
-      <svg ref={svgRef} width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: 'visible', position: 'absolute', inset: 0 }} onClick={(e)=>{ if (e.target === e.currentTarget) setPopup(null) }}>
+    <div ref={wrapRef} style={{ position: 'relative', width: '100%', maxWidth: size, aspectRatio: '1 / 1', margin: '0 auto' }}>
+      <svg ref={svgRef} width={rs} height={rs} viewBox={`0 0 ${rs} ${rs}`} style={{ overflow: 'visible', position: 'absolute', inset: 0 }} onClick={(e)=>{ if (e.target === e.currentTarget) setPopup(null) }}>
       <defs>
         {/* Glow filters for activity dots */}
         {rings.map((ring, i) => (
@@ -193,7 +213,7 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
       </defs>
 
       {/* Background circle with subtle gradient */}
-      <circle cx={center} cy={center} r={radius} fill="#0a0f1e" stroke="#1e293b" strokeWidth={2} />
+      <circle cx={center} cy={center} r={radius} fill="#0a0f1e" stroke="#1e293b" strokeWidth={sw(2)} />
 
       {/* User-category rings (up to 5) */}
       {rings.map((ring, i) => {
@@ -201,8 +221,8 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
         const color = ringColorByCategory[ring.nameKey]
         return (
           <g key={`ring-${ring.name}`}>
-            <circle cx={center} cy={center} r={ringR} fill="none" stroke={color} strokeWidth={1.5} opacity={0.35} />
-            <text x={center} y={center - ringR - 12} fontSize={11} fill={color} textAnchor="middle" dominantBaseline="middle" fontWeight="600">{ring.name}</text>
+            <circle cx={center} cy={center} r={ringR} fill="none" stroke={color} strokeWidth={sw(1.5)} opacity={0.35} />
+            <text x={center} y={center - ringR - 12 * scale} fontSize={fs(11)} fill={color} textAnchor="middle" dominantBaseline="middle" fontWeight="600">{ring.name}</text>
           </g>
         )
       })}
@@ -211,21 +231,21 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
       {Array.from({ length: months }).map((_, i) => {
         const angle = (i / months) * Math.PI * 2 - Math.PI / 2
         // Outer tick
-        const x1 = center + Math.cos(angle) * (radius - 10)
-        const y1 = center + Math.sin(angle) * (radius - 10)
+        const x1 = center + Math.cos(angle) * (radius - 10 * scale)
+        const y1 = center + Math.sin(angle) * (radius - 10 * scale)
         const x2 = center + Math.cos(angle) * radius
         const y2 = center + Math.sin(angle) * radius
         // Label position
-        const labelX = center + Math.cos(angle) * (radius + 20)
-        const labelY = center + Math.sin(angle) * (radius + 20)
+        const labelX = center + Math.cos(angle) * (radius + 18 * scale)
+        const labelY = center + Math.sin(angle) * (radius + 18 * scale)
         
         return (
           <g key={i}>
-            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#475569" strokeWidth={2} />
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#475569" strokeWidth={sw(2)} />
             <text 
               x={labelX} 
               y={labelY} 
-              fontSize={12} 
+              fontSize={fs(12)} 
               fill="#94a3b8" 
               textAnchor="middle" 
               dominantBaseline="middle"
@@ -241,23 +261,24 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
       {Array.from({ length: weeksInYear }).map((_, i) => {
         const w = i + 1
         const angle = (w / weeksInYear) * Math.PI * 2 - Math.PI / 2
-        const inner = radius - 16
-        const outer = radius - 10
+        const inner = radius - 16 * scale
+        const outer = radius - 10 * scale
         const x1 = center + Math.cos(angle) * inner
         const y1 = center + Math.sin(angle) * inner
         const x2 = center + Math.cos(angle) * outer
         const y2 = center + Math.sin(angle) * outer
-        const showLabel = w === 1 || w % 4 === 1
-        const lx = center + Math.cos(angle) * (radius - 32)
-        const ly = center + Math.sin(angle) * (radius - 32)
+        const step = isTiny ? 8 : isSmall ? 6 : 4
+        const showLabel = w === 1 || w % step === 1
+        const lx = center + Math.cos(angle) * (radius - 30 * scale)
+        const ly = center + Math.sin(angle) * (radius - 30 * scale)
         return (
           <g key={`kw-${w}`}>
-            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth={1} opacity={0.6} />
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth={sw(1)} opacity={0.6} />
             {showLabel && (
               <text 
                 x={lx} 
                 y={ly} 
-                fontSize={9} 
+                fontSize={fs(9)} 
                 fill="#64748b" 
                 textAnchor="middle" 
                 dominantBaseline="middle"
@@ -288,7 +309,7 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
             x2={edgeX}
             y2={edgeY}
             stroke={color}
-            strokeWidth={1.5}
+            strokeWidth={sw(1.5)}
             strokeDasharray="3 3"
             opacity={0.35}
           />
@@ -347,9 +368,9 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
                   : `${buildArc(a1, Math.PI * 2 - 0.0001)} ${buildArc(0, a2)}`
                 return (
                   <g>
-                    <path d={path} stroke={color} strokeWidth={14} opacity={0.08} fill="none" strokeLinecap="round" />
-                    <path d={path} stroke={color} strokeWidth={8} opacity={0.18} fill="none" strokeLinecap="round" />
-                    <path d={path} stroke={color} strokeWidth={3} opacity={0.85} fill="none" strokeLinecap="round" />
+                    <path d={path} stroke={color} strokeWidth={sw(14)} opacity={0.08} fill="none" strokeLinecap="round" />
+                    <path d={path} stroke={color} strokeWidth={sw(8)} opacity={0.18} fill="none" strokeLinecap="round" />
+                    <path d={path} stroke={color} strokeWidth={sw(3)} opacity={0.85} fill="none" strokeLinecap="round" />
                   </g>
                 )
               })()
@@ -357,19 +378,19 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
             {/* Start marker (draggable) */}
             <g>
               {/* soft halo */}
-                  <circle cx={x} cy={y} r={11} fill={color} opacity={0.12} />
+                  <circle cx={x} cy={y} r={sw(11)} fill={color} opacity={0.12} />
               {/* ring accent */}
-              <circle cx={x} cy={y} r={9} fill="none" stroke={color} strokeOpacity={0.6} strokeWidth={1.5} />
+              <circle cx={x} cy={y} r={sw(9)} fill="none" stroke={color} strokeOpacity={0.6} strokeWidth={sw(1.5)} />
               {/* core dot */}
-              <circle cx={x} cy={y} r={6} fill={color} stroke="#0f172a" strokeWidth={2} filter={`url(#glow-${catKey})`} onPointerDown={startDrag(a.id, 'start')} >
+              <circle cx={x} cy={y} r={sw(6)} fill={color} stroke="#0f172a" strokeWidth={sw(2)} filter={`url(#glow-${catKey})`} onPointerDown={startDrag(a.id, 'start')} >
                 <title>{`Start: ${a.start ? a.start.toLocaleDateString?.() : ''}`}</title>
               </circle>
               {/* tiny outer cap dot */}
               {hasRange && (
                 (() => {
-                  const capX = center + Math.cos(startAngle) * (r + 10)
-                  const capY = center + Math.sin(startAngle) * (r + 10)
-                  return <circle cx={capX} cy={capY} r={3} fill={color} opacity={0.35} />
+                  const capX = center + Math.cos(startAngle) * (r + 10 * scale)
+                  const capY = center + Math.sin(startAngle) * (r + 10 * scale)
+                  return <circle cx={capX} cy={capY} r={sw(3)} fill={color} opacity={0.35} />
                 })()
               )}
             </g>
@@ -381,21 +402,21 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
               return (
                 <g>
                   {/* soft halo */}
-                  <circle cx={ex} cy={ey} r={11} fill={color} opacity={0.1} />
+                  <circle cx={ex} cy={ey} r={sw(11)} fill={color} opacity={0.1} />
                   {/* ring (hole) */}
-                  <circle cx={ex} cy={ey} r={6} fill="#0f172a" stroke={color} strokeWidth={2} opacity={0.95} onPointerDown={startDrag(a.id, 'end')} >
+                  <circle cx={ex} cy={ey} r={sw(6)} fill="#0f172a" stroke={color} strokeWidth={sw(2)} opacity={0.95} onPointerDown={startDrag(a.id, 'end')} >
                     <title>{`Ende: ${a.end ? a.end.toLocaleDateString?.() : ''}`}</title>
                   </circle>
                   {/* tiny outer cap dot */}
                   {(() => {
-                    const capX = center + Math.cos(endAngle!) * (r + 10)
-                    const capY = center + Math.sin(endAngle!) * (r + 10)
-                    return <circle cx={capX} cy={capY} r={3} fill={color} opacity={0.35} />
+                    const capX = center + Math.cos(endAngle!) * (r + 10 * scale)
+                    const capY = center + Math.sin(endAngle!) * (r + 10 * scale)
+                    return <circle cx={capX} cy={capY} r={sw(3)} fill={color} opacity={0.35} />
                   })()}
                 </g>
               )
             })()}
-            <text x={x + 12} y={y - 10} fontSize={11} fill="#e2e8f0" fontWeight="500" style={{ pointerEvents: 'none' }}>{a.title}</text>
+            <text x={x + 12 * scale} y={y - 10 * scale} fontSize={fs(11)} fill="#e2e8f0" fontWeight="500" style={{ pointerEvents: 'none' }}>{a.title}</text>
           </g>
         )
       })}
@@ -405,7 +426,7 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
       <text 
         x={center} 
         y={center} 
-        fontSize={24} 
+        fontSize={fs(24)} 
         fill="#64748b" 
         textAnchor="middle" 
         dominantBaseline="middle"
@@ -418,8 +439,8 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
       {popup && (
         (() => {
           const isDetailed = Boolean(popup.detailed)
-          const w = isDetailed ? 340 : popupW
-          const h = isDetailed ? 260 : popupH
+          const w = isDetailed ? Math.min(340, rs - 24) : popupW
+          const h = isDetailed ? Math.min(260, rs - 24) : popupH
           return (
             <div style={{ position: 'absolute', left: popup.x, top: popup.y, width: w, height: h }} onClick={(e)=> e.stopPropagation()}>
               <div className="pointer-events-auto select-none rounded-xl border border-white/15 bg-slate-900/90 text-slate-100 shadow-xl backdrop-blur-md p-3 text-[11px]">
