@@ -1,6 +1,6 @@
 "use client"
 
-import { Sun, Moon, MonitorCog, Bell } from "lucide-react"
+import { Sun, Moon, MonitorCog, Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { useModal } from "@/components/ui/modal/ModalProvider"
@@ -49,8 +49,18 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 md:px-6 lg:px-8">
-        {/* Left side - Optional breadcrumbs or title */}
-        <div className="flex items-center gap-4">
+        {/* Left side */}
+        <div className="flex items-center gap-3">
+          {/* Mobile menu toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onMenuClick}
+            className="sm:hidden h-9 w-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+          </Button>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white hidden sm:block">
             KABOOM Marketing Platform
           </h2>

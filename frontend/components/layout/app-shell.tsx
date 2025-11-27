@@ -11,6 +11,7 @@ import CommandPalette from "@/components/command-palette"
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [flags, setFlags] = useState<Record<string, boolean>>({})
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleSidebar = () => setSidebarCollapsed((v) => !v)
 
   // react to feature flags
@@ -70,13 +71,31 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <ModalProvider>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950" style={bgStyle}>
         {/* Sidebar */}
-        <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+        <div className="hidden md:block">
+          <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+        </div>
+
+        {/* Mobile drawer */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-[70] md:hidden">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="close-mobile-menu"
+            />
+            <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw]">
+              {/* Reuse Sidebar at full width for mobile */}
+              <Sidebar isCollapsed={false} onToggle={() => setMobileMenuOpen(false)} />
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div 
           className={`
             transition-all duration-300 ease-in-out
-            ${sidebarCollapsed ? 'ml-20' : 'ml-64'}
+            ml-0
+            ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}
           `}
         >
           {/* DEV ribbon */}
@@ -88,7 +107,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           )}
           {/* Header */}
-          <Header onMenuClick={toggleSidebar} />
+          <Header onMenuClick={() => setMobileMenuOpen(true)} />
 
           {/* Page Content */}
           <main className="p-4 md:p-6 lg:p-8">

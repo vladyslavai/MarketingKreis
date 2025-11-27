@@ -30,6 +30,7 @@ export default function ActivitiesPage() {
   const [ready, setReady] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState<any>(null)
   const [year, setYear] = useState<number>(new Date().getFullYear())
+  const [isSmall, setIsSmall] = useState(false)
   const [zoom, setZoom] = useState<number>(() => {
     if (typeof window === "undefined") return 1
     const z = parseFloat(String(localStorage.getItem("activities:zoom") || ""))
@@ -49,7 +50,16 @@ export default function ActivitiesPage() {
   const { categories, save, reset } = useUserCategories()
   const [editCats, setEditCats] = useState(false)
 
-  useEffect(() => setReady(true), [])
+  useEffect(() => {
+    setReady(true)
+    try {
+      const mql = window.matchMedia("(max-width: 640px)")
+      const apply = () => setIsSmall(mql.matches)
+      apply()
+      mql.addEventListener?.("change", apply)
+      return () => { mql.removeEventListener?.("change", apply) }
+    } catch {}
+  }, [])
   useEffect(() => { try { localStorage.setItem("activities:preset", preset) } catch {} }, [preset])
   useEffect(() => { try { localStorage.setItem("activities:compact", compact ? "1" : "0") } catch {} }, [compact])
   useEffect(() => { try { localStorage.setItem("activities:zoom", String(zoom)) } catch {} }, [zoom])
@@ -237,7 +247,7 @@ export default function ActivitiesPage() {
         {/* Left side: Marketing Circle + Legend */}
         <div className="lg:col-span-3 space-y-6">
           {/* Marketing Circle */}
-          <Card className="glass-card p-5 sm:p-6">
+          <Card className="glass-card p-4 sm:p-6">
             <div className="mb-4 flex items-center gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <span className="px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-white/80">Jahr: {year}</span>
@@ -264,7 +274,10 @@ export default function ActivitiesPage() {
               </div>
               <div className="ml-auto hidden sm:block" />
             </div>
-            <div className="w-full flex items-center justify-center" style={{ height: `${(compact ? 560 : 700) * zoom}px` }}>
+            <div
+              className="w-full flex items-center justify-center"
+              style={{ height: `${(compact ? (isSmall ? 380 : 560) : (isSmall ? 460 : 700)) * zoom}px` }}
+            >
               <RadialCircle
                 activities={visibleActivities.map((a: any) => ({
                   ...a,
@@ -275,7 +288,7 @@ export default function ActivitiesPage() {
                   budgetCHF: a.budgetCHF || 0,
                   expectedLeads: a.expectedLeads || 0,
                 }))}
-                size={700 * zoom}
+                size={(isSmall ? 360 : 700) * zoom}
                 year={year}
                 onActivityClick={(activity) => setSelectedActivity(activity)}
                 categories={categories}
