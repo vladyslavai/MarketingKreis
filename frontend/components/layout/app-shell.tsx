@@ -7,6 +7,7 @@ import { ModalProvider } from "@/components/ui/modal/ModalProvider"
 import ChatWidget from "@/components/chat/chat-widget"
 import { sync } from "@/lib/sync"
 import CommandPalette from "@/components/command-palette"
+import MobileNav from "@/components/layout/mobile-nav"
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -110,12 +111,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Header onMenuClick={() => setMobileMenuOpen(true)} />
 
           {/* Page Content */}
-          <main className="p-4 md:p-6 lg:p-8">
+          <main className="p-4 pb-20 md:pb-6 lg:pb-8 md:p-6 lg:p-8">
             <div className="max-w-[1600px] mx-auto">
               {children}
             </div>
           </main>
           <ChatWidget />
+          <MobileNav />
           <CommandPalette />
         </div>
       </div>
