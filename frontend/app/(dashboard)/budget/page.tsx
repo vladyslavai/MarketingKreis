@@ -6,9 +6,43 @@ import { Input } from "@/components/ui/input"
 import { useBudgetData } from "@/hooks/use-budget-data"
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from "recharts"
 import { DollarSign, Handshake, Target, RefreshCw, Wallet } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 
 export default function BudgetPage() {
   const { budgetData, loading, error, refetch } = useBudgetData()
+  const [pct, setPct] = useState(20)
+  const [elasticity, setElasticity] = useState(0.8)
+  const [scenario, setScenario] = useState<any | null>(null)
+
+  const period = useMemo(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`
+  }, [])
+
+  async function runScenario(p: number, e: number) {
+    try {
+      const res = await fetch('/api/budget/scenario', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          period,
+          changePercent: p,
+          elasticities: { revenue: e, conversion: 0.3, deals: 0.5 },
+        }),
+        credentials: 'include',
+      })
+      const json = await res.json()
+      if (res.ok) setScenario(json)
+      else setScenario({ error: json?.detail || json?.error })
+    } catch (err: any) {
+      setScenario({ error: err?.message || 'Scenario failed' })
+    }
+  }
+
+  useEffect(() => {
+    runScenario(pct, elasticity)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (loading || !budgetData) {
     return (
@@ -60,6 +94,54 @@ export default function BudgetPage() {
 
   return (
     <div className="p-8 space-y-8">
+      {/* Scenario controls */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-white">Budget Scenario</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs text-slate-300">Budget change (%)</label>
+              <div className="flex items-center gap-3">
+                <input type="range" min={-50} max={100} value={pct} onChange={e => setPct(Number(e.target.value))} className="w-full" />
+                <Input value={pct} onChange={e => setPct(Number(e.target.value || 0))} className="w-20" />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-slate-300">Elasticity (revenue)</label>
+              <div className="flex items-center gap-3">
+                <input type="range" min={0} max={1.5} step={0.05} value={elasticity} onChange={e => setElasticity(Number(e.target.value))} className="w-full" />
+                <Input value={elasticity} onChange={e => setElasticity(Number(e.target.value || 0))} className="w-20" />
+              </div>
+            </div>
+            <div className="flex items-end">
+              <Button className="glass-card" onClick={() => runScenario(pct, elasticity)}>Recalculate</Button>
+            </div>
+          </div>
+          {scenario?.error && <div className="text-amber-300 text-sm">{String(scenario.error)}</div>}
+          {scenario && !scenario.error && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-white">
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="text-xs text-slate-300">Total Budget</div>
+                <div className="text-2xl font-semibold">{chf(scenario.scenario.budgetTotal || 0)}</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="text-xs text-slate-300">Forecast Revenue</div>
+                <div className="text-2xl font-semibold">{chf(scenario.scenario.revenue || 0)}</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="text-xs text-slate-300">Conversion</div>
+                <div className="text-2xl font-semibold">{(scenario.scenario.conversion || 0).toFixed(1)}%</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="text-xs text-slate-300">Deals</div>
+                <div className="text-2xl font-semibold">{Math.round(scenario.scenario.deals || 0)}</div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-6 sm:p-8">
         <div className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-gradient-to-tr from-fuchsia-500/30 to-blue-500/30 blur-3xl animate-gradient-shift" />
@@ -118,7 +200,7 @@ export default function BudgetPage() {
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={budgetData.monthlyData}>
+                <LineChart data={(scenario?.scenario?.monthly || budgetData.monthlyData)}>
                   <CartesianGrid stroke="rgba(148, 163, 184, .15)" vertical={false} />
                   <XAxis dataKey="month" stroke="transparent" tick={{ fill: "#a3b1c6" }} axisLine={false} tickLine={false} style={{ fontSize: 12, fontWeight: 500 }} />
                   <YAxis stroke="transparent" tick={{ fill: "#a3b1c6" }} axisLine={false} tickLine={false} style={{ fontSize: 12, fontWeight: 500 }} />
@@ -126,7 +208,7 @@ export default function BudgetPage() {
                   <Legend wrapperStyle={{ fontSize: 12, color: "#a3b1c6" }} />
                   <Line type="monotone" dataKey="planned" stroke="#94a3b8" strokeWidth={2} name="Planned" />
                   <Line type="monotone" dataKey="actual" stroke="#10b981" strokeWidth={3} name="Actual" />
-                  <Line type="monotone" dataKey="forecast" stroke="#3b82f6" strokeWidth={3} strokeDasharray="8 4" name="Forecast" />
+                  <Line type="monotone" dataKey="forecast" stroke="#3b82f6" strokeWidth={3} strokeDasharray="8 4" name="Forecast (Scenario)" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
