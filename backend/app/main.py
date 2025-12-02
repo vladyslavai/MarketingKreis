@@ -11,6 +11,7 @@ from app.api.routes import performance as performance_routes
 from app.api.routes import uploads as uploads_routes
 from app.api.routes import export as export_routes
 from app.api.routes import crm as crm_routes
+from app.api.routes import admin as admin_routes
 from app.api.routes import health as health_routes
 from app.api.routes import imports as imports_routes
 from app.api.routes import jobs as jobs_routes
@@ -60,6 +61,7 @@ def create_app() -> FastAPI:
     app.include_router(jobs_routes.router)
     app.include_router(crm_routes.router)
     app.include_router(assistant_routes.router)
+    app.include_router(admin_routes.router)
     
     # Auto-create tables if not present
     try:
