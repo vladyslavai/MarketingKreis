@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from app.api.deps import get_db_session, require_role
+from app.api.deps import get_db_session, require_role, get_current_user
 from app.models.user import User, UserRole
+from app.core.config import get_settings
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -69,5 +70,32 @@ def admin_stats(
             "latest": latest,
         }
     }
+
+@router.post("/bootstrap-me")
+def bootstrap_me(
+    request: Request,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """
+    One-time bootstrap to grant admin to the current authenticated user.
+    Requires header 'x-admin-bootstrap' to match ADMIN_BOOTSTRAP_TOKEN and that there are no admins yet.
+    """
+    settings = get_settings()
+    token_header = request.headers.get("x-admin-bootstrap")
+    if not settings or not getattr(settings, "admin_bootstrap_token", None):
+        raise HTTPException(status_code=403, detail="Bootstrap disabled")
+    if not token_header or token_header != settings.admin_bootstrap_token:
+        raise HTTPException(status_code=403, detail="Invalid bootstrap token")
+
+    current_admins = db.query(User).filter(User.role == UserRole.admin).count()
+    if current_admins > 0:
+        raise HTTPException(status_code=409, detail="Admin already exists")
+
+    user.role = UserRole.admin
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"status": "ok", "id": user.id, "email": user.email, "role": user.role.value if hasattr(user.role, 'value') else str(user.role)}
 
 
