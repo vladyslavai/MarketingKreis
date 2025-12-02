@@ -54,6 +54,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         border-r border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden z-50 
         transition-all duration-300 ease-in-out
       `}
+      data-tour="sidebar"
     >
       {/* Subtle Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-kaboom-red/5 via-transparent to-blue-500/5 opacity-50"></div>

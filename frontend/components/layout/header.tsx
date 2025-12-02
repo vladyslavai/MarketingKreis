@@ -58,6 +58,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             onClick={onMenuClick}
             className="sm:hidden h-9 w-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             aria-label="Open menu"
+            data-tour="menu-button"
           >
             <Menu className="h-5 w-5 text-slate-700 dark:text-slate-300" />
           </Button>
@@ -81,6 +82,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               })
             }}
             className="relative h-9 w-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            data-tour="notifications"
           >
             <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
             <span className="absolute top-1 right-1 h-2 w-2 bg-kaboom-red rounded-full"></span>
@@ -94,6 +96,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               onClick={toggleMode}
               className="h-9 w-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               title={mode === 'auto' ? 'Theme: Auto' : mode === 'light' ? 'Theme: Light' : 'Theme: Dark'}
+              data-tour="theme-toggle"
             >
               {mode === "auto" && <MonitorCog className="h-5 w-5 text-slate-600 dark:text-slate-400" />}
               {mode === "light" && <Sun className="h-5 w-5 text-amber-500" />}

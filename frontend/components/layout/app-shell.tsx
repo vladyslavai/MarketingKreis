@@ -8,6 +8,7 @@ import ChatWidget from "@/components/chat/chat-widget"
 import { sync } from "@/lib/sync"
 import CommandPalette from "@/components/command-palette"
 import MobileNav from "@/components/layout/mobile-nav"
+import OnboardingTour from "@/components/onboarding/onboarding-tour"
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -116,8 +117,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {children}
             </div>
           </main>
+          <OnboardingTour />
           <ChatWidget />
-          <MobileNav />
+          <div data-tour="mobile-nav">
+            <MobileNav />
+          </div>
           <CommandPalette />
         </div>
       </div>

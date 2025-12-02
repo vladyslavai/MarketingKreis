@@ -120,7 +120,7 @@ export default function DashboardPage() {
 			</motion.div>
 
 			<motion.div variants={itemVariants}>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+				<div id="tour-kpis" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
 					{kpiCards.map((card, index) => (
 						<motion.div key={index} variants={cardHoverVariants} whileHover="hover">
 							<Link href={card.link}>
@@ -145,7 +145,7 @@ export default function DashboardPage() {
 
 			<motion.div variants={itemVariants}>
 				<h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-6">Module</h2>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+				<div id="tour-modules" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 					{moduleCards.map((module, index) => (
 						<motion.div key={index} variants={cardHoverVariants} whileHover="hover">
 							<Link href={module.link}>
