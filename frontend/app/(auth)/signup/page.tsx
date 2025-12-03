@@ -33,20 +33,30 @@ function SignupInner() {
       }
       // Если бэкенд вернул verify.token (SMTP не настроен), авто‑подтверждаем без письма
       if (data?.verify?.token) {
+        const token = String(data.verify.token)
+        // 1) через внутренний proxy (сервер → бэкенд)
         try {
-          const r = await fetch(`/api/auth/verify?token=${encodeURIComponent(data.verify.token)}`, {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          })
+          const r = await fetch(`/api/auth/verify?token=${encodeURIComponent(token)}`, { method: "GET", credentials: "include", cache: "no-store" })
           if (r.ok) {
             setMessage("Аккаунт зарегистрирован и подтверждён. Теперь можно войти.")
             setTimeout(() => router.push("/signin"), 1200)
             return
           }
         } catch {}
+        // 2) прямой вызов бэкенда из браузера (если CORS разрешён)
+        try {
+          const base = process.env.NEXT_PUBLIC_API_BASE_URL
+          if (base) {
+            const r2 = await fetch(`${base.replace(/\/$/, "")}/auth/verify?token=${encodeURIComponent(token)}`, { method: "GET", credentials: "include", cache: "no-store", mode: "cors" })
+            if (r2.ok) {
+              setMessage("Аккаунт зарегистрирован и подтверждён. Теперь можно войти.")
+              setTimeout(() => router.push("/signin"), 1200)
+              return
+            }
+          }
+        } catch {}
         // fallback: показать ручную ссылку, если автоподтверждение не удалось
-        setMessage("Проверьте почту. Если письма нет, можно подтвердить по этой ссылке: /auth/verify?token=" + data.verify.token)
+        setMessage("Проверьте почту. Если письма нет, можно подтвердить по этой ссылке: /auth/verify?token=" + token)
       } else {
         setMessage("Аккаунт зарегистрирован. Теперь можно войти.")
         setTimeout(() => router.push("/signin"), 1200)
