@@ -180,6 +180,19 @@ def register(body: RegisterRequest, response: Response, db: Session = Depends(ge
     db.commit()
     db.refresh(user)
 
+    # Optional: skip email verification completely (for demos)
+    try:
+        if getattr(settings, "skip_email_verify", False):
+            user.is_verified = True
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
+            return {"id": user.id, "email": user.email, "role": role_value}
+    except Exception:
+        # fall through to normal verify flow if anything goes wrong
+        pass
+
     # Generate email verification token
     verify_token = _encode_special({"typ": "verify", "email": user.email}, minutes=60*24*3)
     # Send email if SMTP configured

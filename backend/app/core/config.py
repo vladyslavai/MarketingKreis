@@ -71,6 +71,8 @@ class Settings(BaseSettings):
     frontend_url: Optional[str] = Field(default=None, env="FRONTEND_URL")
     # Admin bootstrap (optional, use only for first setup)
     admin_bootstrap_token: Optional[str] = Field(default=None, env="ADMIN_BOOTSTRAP_TOKEN")
+    # Feature flags
+    skip_email_verify: bool = Field(default=False, env="SKIP_EMAIL_VERIFY")
 
     @validator("jwt_secret_key")
     def validate_jwt_secret(cls, v: str, values: dict) -> str:
