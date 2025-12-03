@@ -1,7 +1,2 @@
-{
-  "framework": "nextjs",
-  "root": "frontend",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build"
-}
+{}
 
