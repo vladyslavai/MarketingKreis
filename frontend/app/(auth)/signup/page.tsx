@@ -1,11 +1,12 @@
 "use client"
 import { Suspense, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 function SignupInner() {
   const params = useSearchParams()
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [submitting, setSubmitting] = useState(false)
@@ -30,11 +31,25 @@ function SignupInner() {
         setSubmitting(false)
         return
       }
-      // If backend returned verify token (SMTP не настроен), покажем ссылку
+      // Если бэкенд вернул verify.token (SMTP не настроен), авто‑подтверждаем без письма
       if (data?.verify?.token) {
+        try {
+          const r = await fetch(`/api/auth/verify?token=${encodeURIComponent(data.verify.token)}`, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          })
+          if (r.ok) {
+            setMessage("Аккаунт зарегистрирован и подтверждён. Теперь можно войти.")
+            setTimeout(() => router.push("/signin"), 1200)
+            return
+          }
+        } catch {}
+        // fallback: показать ручную ссылку, если автоподтверждение не удалось
         setMessage("Проверьте почту. Если письма нет, можно подтвердить по этой ссылке: /auth/verify?token=" + data.verify.token)
       } else {
-        setMessage("Проверьте почту для подтверждения адреса.")
+        setMessage("Аккаунт зарегистрирован. Теперь можно войти.")
+        setTimeout(() => router.push("/signin"), 1200)
       }
     } catch (e: any) {
       setMessage(e?.message || "Unexpected error")
