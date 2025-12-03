@@ -1,8 +1,10 @@
 "use client"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 
-export default function VerifyPage() {
+export const dynamic = "force-dynamic"
+
+function VerifyInner() {
   const params = useSearchParams()
   const router = useRouter()
   const token = params.get("token") || ""
@@ -31,6 +33,14 @@ export default function VerifyPage() {
         <p className="text-sm text-slate-600 dark:text-slate-300 break-all">{msg || "Checking token..."}</p>
       </div>
     </div>
+  )
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-slate-500">Loading…</div>}>
+      <VerifyInner />
+    </Suspense>
   )
 }
 

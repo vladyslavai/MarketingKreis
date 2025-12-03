@@ -35,10 +35,12 @@ export default function RadialCircle({ activities, size = 600, year = new Date()
   React.useEffect(() => {
     const el = wrapRef.current
     if (!el) return
-    const ro = new (window as any).ResizeObserver?.((entries: any[]) => {
+    // ResizeObserver optional chaining cannot be used with `new`. Use a guard instead.
+    const RO = (window as any).ResizeObserver
+    const ro = RO ? new RO((entries: any[]) => {
       const w = Math.max(240, Math.floor(entries[0].contentRect.width))
       setRenderSize(Math.min(size, w))
-    })
+    }) : null
     if (ro) { ro.observe(el); return () => ro.disconnect() }
   }, [size])
   const rs = renderSize
