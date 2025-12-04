@@ -14,6 +14,34 @@ export async function POST(req: NextRequest) {
     })
     const setCookie = r.headers.get('set-cookie') || undefined
     const text = await r.text()
+
+    // Try to parse and auto-verify on the server to avoid exposing raw token to the client
+    if (r.ok) {
+      try {
+        const json = JSON.parse(text)
+        const token = json?.verify?.token as string | undefined
+        if (token) {
+          try {
+            const vr = await fetch(`${apiUrl}/auth/verify?token=${encodeURIComponent(token)}`, {
+              method: 'GET',
+              credentials: 'include',
+              cache: 'no-store',
+              signal: (AbortSignal as any).timeout ? (AbortSignal as any).timeout(15000) : undefined,
+            })
+            if (vr.ok) {
+              delete json.verify
+              ;(json as any).autoVerified = true
+            }
+          } catch {}
+        }
+        const resp = NextResponse.json(json, { status: r.status })
+        if (setCookie) resp.headers.set('set-cookie', setCookie)
+        return resp
+      } catch {
+        // fallthrough: backend returned non-JSON
+      }
+    }
+
     const resp = new NextResponse(text, { status: r.status })
     if (setCookie) resp.headers.set('set-cookie', setCookie)
     return resp
