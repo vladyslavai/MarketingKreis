@@ -1,20 +1,26 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:8000'
-  const targetUrl = `${backendUrl}/auth/login`
+  const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://kreismarketing-backend-xvag.onrender.com').replace(/\/$/, '')
+  const targetUrl = `${apiUrl}/auth/login`
 
   try {
     const body = await request.text()
-    const headers = new Headers(request.headers)
-    headers.set('Content-Type', 'application/json')
+    const headers = new Headers({ 'Content-Type': 'application/json' })
+
+    // Short server-side timeout to avoid 504s on Vercel
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 9000)
 
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers,
       body,
-      // cookies are proxied via headers; Next will forward the response Set-Cookie
+      cache: 'no-store',
+      // Next will forward Set-Cookie from backend response to the client
+      signal: controller.signal,
     })
+    clearTimeout(timer)
 
     const text = await response.text()
     const next = new NextResponse(text, { status: response.status })

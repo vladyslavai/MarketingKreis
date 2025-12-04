@@ -39,7 +39,21 @@ function SignupInner() {
         setSubmitting(false)
         return
       }
-      // Успех: сразу даём войти
+      // Успех: автоматический вход
+      try {
+        const loginRes = await fetch(`/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+          credentials: "include",
+        })
+        if (loginRes.ok) {
+          const next = loginRes.headers.get('X-Redirect-To') || "/dashboard"
+          router.push(next)
+          return
+        }
+      } catch {}
+      // fallback: показать успешную регистрацию и перейти на /signin
       setMessage("Аккаунт зарегистрирован. Теперь можно войти.")
       setTimeout(() => router.push("/signin"), 1200)
     } catch (e: any) {
