@@ -50,7 +50,11 @@ def create_app() -> FastAPI:
 
     # CSRF middleware (prod-only)
     if settings.environment == "production":
-        app.add_middleware(CSRFMiddleware, allowed_origins=origins)
+        app.add_middleware(
+            CSRFMiddleware,
+            allowed_origins=origins,
+            allowed_origin_regex=getattr(settings, "backend_cors_origins_regex", None),
+        )
 
     # Routers
     app.include_router(health_routes.router)

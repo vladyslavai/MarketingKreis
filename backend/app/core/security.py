@@ -1,8 +1,9 @@
-from typing import Iterable
+from typing import Iterable, Optional
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from app.core.config import get_settings
+import re
 
 
 class CSRFMiddleware(BaseHTTPMiddleware):
@@ -12,9 +13,10 @@ class CSRFMiddleware(BaseHTTPMiddleware):
     - Skips GET/HEAD/OPTIONS
     """
 
-    def __init__(self, app, allowed_origins: Iterable[str]):
+    def __init__(self, app, allowed_origins: Iterable[str], allowed_origin_regex: Optional[str] = None):
         super().__init__(app)
         self.allowed = set(allowed_origins)
+        self._regex = re.compile(allowed_origin_regex) if allowed_origin_regex else None
 
     async def dispatch(self, request: Request, call_next):
         if request.method in ("GET", "HEAD", "OPTIONS"):
@@ -23,10 +25,16 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         origin = request.headers.get("origin") or ""
         referer = request.headers.get("referer") or ""
 
-        if origin and not any(origin.startswith(a) for a in self.allowed):
-            return Response("Forbidden (CSRF origin)", status_code=403)
-        if referer and not any(referer.startswith(a) for a in self.allowed):
-            return Response("Forbidden (CSRF referer)", status_code=403)
+        if origin:
+            if self._regex and self._regex.match(origin):
+                pass
+            elif not any(origin.startswith(a) for a in self.allowed):
+                return Response("Forbidden (CSRF origin)", status_code=403)
+        if referer:
+            if self._regex and self._regex.match(referer):
+                pass
+            elif not any(referer.startswith(a) for a in self.allowed):
+                return Response("Forbidden (CSRF referer)", status_code=403)
 
         return await call_next(request)
 
