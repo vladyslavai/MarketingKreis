@@ -19,12 +19,19 @@ function SignupInner() {
     setSubmitting(true)
     setMessage(null)
     try {
-      const res = await fetch("/api/auth/register", {
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL
+      const controller = typeof window !== "undefined" ? new AbortController() : undefined
+      const timeout = typeof window !== "undefined" ? window.setTimeout(() => controller?.abort(), 20000) : undefined
+      const url = base ? `${base.replace(/\/$/, "")}/auth/register` : "/api/auth/register"
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, token }),
         credentials: "include",
+        cache: "no-store",
+        signal: controller?.signal,
       })
+      if (timeout) window.clearTimeout(timeout)
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setMessage(data?.detail || data?.error || "Fehler bei Registrierung")

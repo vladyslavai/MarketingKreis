@@ -3,15 +3,18 @@ import { NextRequest, NextResponse } from "next/server"
 export async function POST(req: NextRequest) {
   try {
     const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://kreismarketing-backend-xvag.onrender.com').replace(/\/$/, '')
+    // Use explicit AbortController to avoid platform 10s timeouts (set to 9s)
+    const controller = new AbortController()
+    const t = setTimeout(() => controller.abort(), 9000)
     const r = await fetch(`${apiUrl}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: await req.text(),
       credentials: 'include',
       cache: 'no-store',
-      // Abort if backend doesn’t respond within 15s to avoid hanging UI
-      signal: (AbortSignal as any).timeout ? (AbortSignal as any).timeout(15000) : undefined,
+      signal: controller.signal,
     })
+    clearTimeout(t)
     const setCookie = r.headers.get('set-cookie') || undefined
     const text = await r.text()
 
