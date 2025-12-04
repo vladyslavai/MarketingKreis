@@ -19,10 +19,11 @@ function SignupInner() {
     setSubmitting(true)
     setMessage(null)
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend.onrender.com"
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL || ""
       const controller = typeof window !== "undefined" ? new AbortController() : undefined
       const timeout = typeof window !== "undefined" ? window.setTimeout(() => controller?.abort(), 20000) : undefined
-      const url = `${base.replace(/\/$/, "")}/auth/register`
+      // Через наш серверный прокси, чтобы исключить CORS
+      const url = base ? `${base.replace(/\/$/, "")}/auth/register` : "/api/auth/register"
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
