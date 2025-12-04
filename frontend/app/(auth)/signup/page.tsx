@@ -39,22 +39,23 @@ function SignupInner() {
         setSubmitting(false)
         return
       }
-      // Успех: автоматический вход
+      // Успех: сразу логинимся через API роут, чтобы куки сохранились на домене фронта
       try {
-        const loginRes = await fetch(`/api/auth/login`, {
+        const loginRes = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
           credentials: "include",
+          cache: "no-store",
         })
         if (loginRes.ok) {
-          const next = loginRes.headers.get('X-Redirect-To') || "/dashboard"
-          router.push(next)
+          setMessage("Готово! Перенаправляю…")
+          setTimeout(() => router.push("/dashboard"), 600)
           return
         }
       } catch {}
-      // fallback: показать успешную регистрацию и перейти на /signin
-      setMessage("Аккаунт зарегистрирован. Теперь можно войти.")
+      // Фоллбек: просто предложить войти вручную
+      setMessage("Аккаунт зарегистрирован. Войдите, пожалуйста.")
       setTimeout(() => router.push("/signin"), 1200)
     } catch (e: any) {
       setMessage(e?.message || "Unexpected error")
