@@ -17,6 +17,10 @@ class Settings(BaseSettings):
         default="http://localhost:3000,http://127.0.0.1:3000",
         env="BACKEND_CORS_ORIGINS"
     )
+    # Optional regex to allow multiple origins (e.g., all vercel.app subdomains)
+    backend_cors_origins_regex: Optional[str] = Field(
+        default=None, env="BACKEND_CORS_ORIGINS_REGEX"
+    )
 
     # CRITICAL: No more SQLite default - PostgreSQL only
     database_url: str = Field(

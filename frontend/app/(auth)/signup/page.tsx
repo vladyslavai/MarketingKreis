@@ -19,16 +19,17 @@ function SignupInner() {
     setSubmitting(true)
     setMessage(null)
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE_URL
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend-xvag.onrender.com"
       const controller = typeof window !== "undefined" ? new AbortController() : undefined
       const timeout = typeof window !== "undefined" ? window.setTimeout(() => controller?.abort(), 20000) : undefined
-      const url = base ? `${base.replace(/\/$/, "")}/auth/register` : "/api/auth/register"
+      const url = `${base.replace(/\/$/, "")}/auth/register`
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, token }),
         credentials: "include",
         cache: "no-store",
+        mode: "cors",
         signal: controller?.signal,
       })
       if (timeout) window.clearTimeout(timeout)

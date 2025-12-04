@@ -36,13 +36,17 @@ def create_app() -> FastAPI:
 
     # CORS
     origins = [o.strip() for o in settings.backend_cors_origins.split(',') if o.strip()]
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
+    cors_kwargs = dict(
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    # Prefer explicit origins; add regex for vercel if configured
+    if origins:
+        cors_kwargs["allow_origins"] = origins  # type: ignore
+    if getattr(settings, "backend_cors_origins_regex", None):
+        cors_kwargs["allow_origin_regex"] = settings.backend_cors_origins_regex  # type: ignore
+    app.add_middleware(CORSMiddleware, **cors_kwargs)
 
     # CSRF middleware (prod-only)
     if settings.environment == "production":
