@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token') || ''
   try {
-    const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://kreismarketing-backend.onrender.com').replace(/\/$/, '')
+    const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://kreismarketing-backend-xvag.onrender.com').replace(/\/$/, '')
     const r = await fetch(`${apiUrl}/auth/verify?token=${encodeURIComponent(token)}`, {
       method: 'GET',
       credentials: 'include',
