@@ -19,7 +19,7 @@ function VerifyInner() {
         const data = await res.json().catch(() => ({}))
         if (!res.ok) { setStatus("error"); setMsg(data?.detail || data?.error || "Verification failed"); return }
         setStatus("ok"); setMsg("Email confirmed. You can sign in now.")
-        setTimeout(() => router.push("/signin"), 1500)
+        setTimeout(() => router.push("/signup?mode=login"), 1500)
       } catch (e: any) {
         setStatus("error"); setMsg(e?.message || "Unexpected error")
       }

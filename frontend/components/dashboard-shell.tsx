@@ -76,7 +76,7 @@ export function DashboardShell({
   const handleLogout = async () => {
     try {
       await api.auth.logout()
-      router.push("/signin")
+      router.push("/signup?mode=login")
       toast({
         title: "Abgemeldet",
         description: "Sie wurden erfolgreich abgemeldet.",

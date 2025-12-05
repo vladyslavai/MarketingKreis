@@ -118,7 +118,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 confirmText: "Ausloggen",
                 cancelText: "Abbrechen",
                 onConfirm: () => {
-                  window.location.href = '/signin'
+                  window.location.href = '/signup?mode=login'
                 }
               })
             }}

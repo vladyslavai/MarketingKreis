@@ -5,21 +5,29 @@ export async function middleware(request: NextRequest) {
   // Important: Do NOT proxy /api/* here. Next.js rewrites (next.config.js) will
   // forward requests to the backend and preserve body/cookies correctly.
 
+  const pathname = request.nextUrl.pathname
+
+  // Hard redirect old /signin to the new combined auth page
+  if (pathname === '/signin') {
+    const url = new URL('/signup?mode=login', request.url)
+    return NextResponse.redirect(url)
+  }
+
   // Route protection for app pages only
   const protectedPrefixes = ['/dashboard', '/crm', '/calendar', '/activities', '/content', '/performance', '/budget', '/uploads', '/reports', '/admin']
-  const isProtected = protectedPrefixes.some((p) => request.nextUrl.pathname === p || request.nextUrl.pathname.startsWith(p + '/'))
-  const isSignin = request.nextUrl.pathname === '/signin'
+  const isProtected = protectedPrefixes.some((p) => pathname === p || pathname.startsWith(p + '/'))
+  const isAuthPage = pathname === '/signup'
   const hasAccessToken = Boolean(request.cookies.get('access_token')?.value)
 
-  // If visiting signin while already authenticated -> redirect to dashboard
-  if (isSignin && hasAccessToken) {
+  // If visiting auth page while already authenticated -> redirect to dashboard
+  if (isAuthPage && hasAccessToken) {
     const url = new URL('/dashboard', request.url)
     return NextResponse.redirect(url)
   }
 
-  // If visiting protected route without auth -> redirect to signin
+  // If visiting protected route without auth -> redirect to signup
   if (isProtected && !hasAccessToken) {
-    const url = new URL('/signin', request.url)
+    const url = new URL('/signup', request.url)
     return NextResponse.redirect(url)
   }
 
@@ -40,5 +48,6 @@ export const config = {
     '/reports/:path*',
     '/admin/:path*',
     '/signin',
+    '/signup',
   ],
 }
