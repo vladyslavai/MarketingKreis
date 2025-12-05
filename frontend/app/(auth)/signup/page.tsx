@@ -19,10 +19,9 @@ function SignupInner() {
     setSubmitting(true)
     setMessage(null)
     try {
-      const controller = typeof window !== "undefined" ? new AbortController() : undefined
-      const timeout = typeof window !== "undefined" ? window.setTimeout(() => controller?.abort(), 20000) : undefined
-      // Всегда через наш серверный прокси, чтобы исключить CORS
-      const url = "/api/auth/register"
+      // Бьём напрямую в бекенд (Render), CORS уже разрешён
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend.onrender.com"
+      const url = `${base.replace(/\/$/, "")}/auth/register`
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -30,16 +29,14 @@ function SignupInner() {
         credentials: "include",
         cache: "no-store",
         mode: "cors",
-        signal: controller?.signal,
       })
-      if (timeout) window.clearTimeout(timeout)
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setMessage(data?.detail || data?.error || "Fehler bei Registrierung")
         setSubmitting(false)
         return
       }
-      // Фоллбек: просто предложить войти вручную (без автологина)
+      // Успех: просто предложить войти вручную (без автологина)
       setMessage("Аккаунт зарегистрирован. Войдите, пожалуйста.")
       setTimeout(() => router.push("/signin"), 1200)
     } catch (e: any) {
