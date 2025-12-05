@@ -171,6 +171,17 @@ def register(body: RegisterRequest, response: Response, db: Session = Depends(ge
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
+
+    # If this is the very first user in the system, make them admin
+    # This replaces the need for a separate seed step in demo setups.
+    try:
+        total_users = db.query(User).count()
+        if total_users == 0:
+            role = UserRole.admin
+    except Exception:
+        # If counting users fails for any reason, fall back to normal role logic
+        pass
+
     try:
         role = UserRole(invited_role)
     except Exception:
