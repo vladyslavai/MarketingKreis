@@ -3,6 +3,7 @@ from app.db.session import SessionLocal
 from app.models.user import User, UserRole
 from app.models.activity import Activity, ActivityType
 from app.models.performance import Performance
+from app.models.calendar import CalendarEntry  # ensure model is registered
 import bcrypt
 
 
