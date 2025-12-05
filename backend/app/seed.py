@@ -1,10 +1,12 @@
+import bcrypt
 from sqlalchemy.orm import Session
-from app.db.session import SessionLocal
+
+from app.db.base import Base
+from app.db.session import SessionLocal, engine
 from app.models.user import User, UserRole
 from app.models.activity import Activity, ActivityType
 from app.models.performance import Performance
 from app.models.calendar import CalendarEntry  # ensure model is registered
-import bcrypt
 
 
 def _hash_password(pw: str) -> str:
@@ -12,6 +14,12 @@ def _hash_password(pw: str) -> str:
 
 
 def seed() -> None:
+    # Ensure tables exist (especially for fresh SQLite DBs)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"⚠️ Could not create tables before seeding: {e}")
+
     db: Session = SessionLocal()
     try:
         if not db.query(User).filter(User.email == "admin@marketingkreis.ch").first():
