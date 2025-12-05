@@ -39,22 +39,7 @@ function SignupInner() {
         setSubmitting(false)
         return
       }
-      // Успех: сразу логинимся через API роут, чтобы куки сохранились на домене фронта
-      try {
-        const loginRes = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-          credentials: "include",
-          cache: "no-store",
-        })
-        if (loginRes.ok) {
-          setMessage("Готово! Перенаправляю…")
-          setTimeout(() => router.push("/dashboard"), 600)
-          return
-        }
-      } catch {}
-      // Фоллбек: просто предложить войти вручную
+      // Фоллбек: просто предложить войти вручную (без автологина)
       setMessage("Аккаунт зарегистрирован. Войдите, пожалуйста.")
       setTimeout(() => router.push("/signin"), 1200)
     } catch (e: any) {
