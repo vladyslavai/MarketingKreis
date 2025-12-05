@@ -2,8 +2,12 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models.user import User, UserRole
 from app.models.activity import Activity, ActivityType
-from app.core.security import get_password_hash
 from app.models.performance import Performance
+import bcrypt
+
+
+def _hash_password(pw: str) -> str:
+    return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode("utf-8")
 
 
 def seed() -> None:
@@ -11,11 +15,9 @@ def seed() -> None:
     try:
         if not db.query(User).filter(User.email == "admin@marketingkreis.ch").first():
             admin = User(
-                name="Admin User",
                 email="admin@marketingkreis.ch",
                 role=UserRole.admin,
-                password_hash=get_password_hash("password123"),
-                token_version=0
+                hashed_password=_hash_password("password123"),
             )
             db.add(admin)
             print("✓ Created admin user: admin@marketingkreis.ch / password123")
