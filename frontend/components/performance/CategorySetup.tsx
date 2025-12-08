@@ -42,12 +42,10 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="relative overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-950/80 shadow-xl">
-        {/* Glow accents */}
-        <div className="pointer-events-none absolute -top-24 -right-28 h-56 w-56 rounded-full bg-gradient-to-br from-violet-500/30 to-fuchsia-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-28 h-56 w-56 rounded-full bg-gradient-to-tr from-cyan-500/25 to-emerald-400/20 blur-3xl" />
-
-        <CardHeader className="relative pb-3">
+      {/* Ein einheitlicher, ruhiger Hintergrund – ohne zusätzliche Glows,
+          damit sich der Dialog harmonisch in den Modal-Hintergrund einfügt. */}
+      <Card className="relative rounded-2xl border border-white/12 bg-slate-950/80 shadow-xl backdrop-blur-xl">
+        <CardHeader className="relative pb-3 pt-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-slate-50">
@@ -66,15 +64,15 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
           </div>
         </CardHeader>
 
-        <CardContent className="relative pt-0">
-          <div className="space-y-4">
+        <CardContent className="relative pt-1 pb-4">
+          <div className="space-y-3.5">
             {items.map((it, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 4, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.18, delay: idx * 0.03 }}
-                className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2.5 shadow-sm hover:border-violet-400/40 hover:bg-slate-900/90 transition-colors"
+                className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 shadow-sm hover:border-violet-400/40 hover:bg-slate-900/80 transition-colors"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-slate-900/80">
                   <span
@@ -88,7 +86,7 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
                     placeholder={`Kategorie #${idx + 1}`}
                     value={it.name}
                     onChange={(e) => update(idx, { name: e.target.value })}
-                    className="w-full h-9 rounded-lg border border-white/10 bg-slate-900/80 px-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none ring-0 focus:border-violet-400/70 focus:ring-1 focus:ring-violet-500/40 transition-all"
+                    className="w-full h-9 rounded-lg border border-white/10 bg-slate-950/80 px-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none ring-0 focus:border-violet-400/70 focus:ring-1 focus:ring-violet-500/40 transition-all"
                   />
                   <p className="text-[11px] text-slate-500">
                     Diese Kategorie wird im Kreis und in Listen angezeigt.
@@ -119,7 +117,7 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
               </motion.div>
             ))}
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
