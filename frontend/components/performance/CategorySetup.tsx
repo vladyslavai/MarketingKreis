@@ -42,10 +42,9 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      {/* Ein einheitlicher, ruhiger Hintergrund – ohne zusätzliche Glows,
-          damit sich der Dialog harmonisch in den Modal-Hintergrund einfügt. */}
-      <Card className="relative rounded-2xl border border-white/12 bg-slate-950/80 shadow-xl backdrop-blur-xl">
-        <CardHeader className="relative pb-3 pt-4">
+      {/* Kompakter Glass‑Card Stil, чтобы вписаться в Sidebar‑карточку „Kategorien“ */}
+      <Card className="glass-card relative rounded-2xl">
+        <CardHeader className="relative pb-3 pt-3 sm:pt-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-slate-50">
@@ -64,15 +63,15 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
           </div>
         </CardHeader>
 
-        <CardContent className="relative pt-1 pb-4">
-          <div className="space-y-3.5">
+        <CardContent className="relative pt-1 pb-3 sm:pb-4">
+          <div className="space-y-3">
             {items.map((it, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 4, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.18, delay: idx * 0.03 }}
-                className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 shadow-sm hover:border-violet-400/40 hover:bg-slate-900/80 transition-colors"
+                className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 shadow-sm hover:border-violet-400/40 hover:bg-slate-900/80 transition-colors"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-slate-900/80">
                   <span
