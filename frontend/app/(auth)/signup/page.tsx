@@ -36,6 +36,7 @@ function SignupInner() {
   const [loginShowPassword, setLoginShowPassword] = useState(false)
   const [loginRemember, setLoginRemember] = useState(false)
   const [loginCapsLock, setLoginCapsLock] = useState(false)
+  const [loginLoading, setLoginLoading] = useState(false)
 
   const token = params.get("token") || ""
 
@@ -112,10 +113,10 @@ function SignupInner() {
   async function onLoginSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoginError(null)
+    setLoginLoading(true)
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend.onrender.com"
-      const url = `${base.replace(/\/$/, "")}/auth/login`
-      const res = await fetch(url, {
+      // Use Next.js API proxy to avoid any direct browser CORS issues
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
@@ -141,6 +142,8 @@ function SignupInner() {
       router.push(redirectTo)
     } catch (e: any) {
       setLoginError(e?.message || "Login fehlgeschlagen")
+    } finally {
+      setLoginLoading(false)
     }
   }
 
@@ -499,9 +502,20 @@ function SignupInner() {
 
                   <Button
                     type="submit"
+                    disabled={loginLoading}
                     className="h-11 w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 transition-all hover:from-violet-500 hover:to-fuchsia-500 hover:shadow-violet-500/40 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <span className="inline-flex items-center gap-2">Einloggen</span>
+                    {loginLoading ? (
+                      <span className="inline-flex items-center gap-2">
+                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25" />
+                          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        </svg>
+                        Wird eingeloggt...
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2">Einloggen</span>
+                    )}
                   </Button>
 
                   <div className="text-center">
@@ -561,5 +575,6 @@ export default function SignupPage() {
     </Suspense>
   )
 }
+
 
 
