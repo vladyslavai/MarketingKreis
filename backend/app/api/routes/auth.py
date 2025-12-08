@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, Request
 import json
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.db.session import get_db_session
 from app.core.config import get_settings
 from datetime import timedelta, datetime, timezone
@@ -67,8 +68,12 @@ async def login(request: Request, response: Response, db: Session = Depends(get_
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
 
-    # Verify user and password
-    user = db.query(User).filter(User.email == email).first()
+    # Normalize email (trim + case-insensitive) to avoid subtle user input issues
+    email = email.strip().lower()
+    password = password.strip()
+
+    # Verify user and password (case-insensitive email match)
+    user = db.query(User).filter(func.lower(User.email) == email).first()
     if not user or not user.hashed_password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     try:

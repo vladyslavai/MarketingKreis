@@ -13,40 +13,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Route protection for app pages only
-  const protectedPrefixes = ['/dashboard', '/crm', '/calendar', '/activities', '/content', '/performance', '/budget', '/uploads', '/reports', '/admin']
-  const isProtected = protectedPrefixes.some((p) => pathname === p || pathname.startsWith(p + '/'))
-  const isAuthPage = pathname === '/signup'
-  const hasAccessToken = Boolean(request.cookies.get('access_token')?.value)
-
-  // If visiting auth page while already authenticated -> redirect to dashboard
-  if (isAuthPage && hasAccessToken) {
-    const url = new URL('/dashboard', request.url)
-    return NextResponse.redirect(url)
-  }
-
-  // If visiting protected route without auth -> redirect to signup
-  if (isProtected && !hasAccessToken) {
-    const url = new URL('/signup', request.url)
-    return NextResponse.redirect(url)
-  }
+  // NOTE: For the current demo setup we do NOT protect app pages on the Next.js layer,
+  // because authentication is handled directly by the backend service cookies.
+  // We still keep the /signin -> /signup redirect above, but let all other routes pass through.
 
   return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    // NOTE: Do not match '/api/:path*' to avoid consuming request bodies in middleware
-    '/dashboard/:path*',
-    '/crm/:path*',
-    '/calendar/:path*',
-    '/activities/:path*',
-    '/content/:path*',
-    '/performance/:path*',
-    '/budget/:path*',
-    '/uploads/:path*',
-    '/reports/:path*',
-    '/admin/:path*',
+    // Only handle auth entry pages; app pages are not gated here because
+    // backend authentication is done via its own cookies.
     '/signin',
     '/signup',
   ],
