@@ -74,7 +74,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950" style={bgStyle}>
         {/* Sidebar */}
         <div className="hidden md:block">
-          <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+        <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
         </div>
 
         {/* Mobile drawer */}
