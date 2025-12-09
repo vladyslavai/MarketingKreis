@@ -94,7 +94,7 @@ export default function PerformancePage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto p-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Skeleton className="h-16 w-80" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
@@ -170,31 +170,36 @@ export default function PerformancePage() {
   // Если нет сохранённых категорий — показываем мастер настройки
   if (categories && categories.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto p-8">
+      <div className="max-w-3xl mx-auto px-4 py-6 sm:p-8">
         <CategorySetup />
       </div>
     )
   }
 
   return (
-    <motion.div className="max-w-7xl mx-auto p-8 space-y-8" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Header */}
       <motion.div variants={itemVariants} className="relative">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-6">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center backdrop-blur-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center backdrop-blur-sm">
               <BarChart3 className="h-8 w-8 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100">Performance</h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">Umsatz, Pipeline, Leads und Aktivitäten im Überblick</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100">Performance</h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">Umsatz, Pipeline, Leads und Aktivitäten im Überblick</p>
             </div>
           </div>
-          <Badge className="glass-card px-4 py-2 text-sm font-medium">KABOOM</Badge>
+          <Badge className="glass-card px-4 py-2 text-sm font-medium self-start sm:self-auto">KABOOM</Badge>
         </div>
 
         {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
           {kpiCards.map((card, i) => (
             <motion.div key={i} variants={cardHoverVariants} whileHover="hover">
               <Card className="glass-card p-6 group overflow-hidden">
@@ -221,7 +226,7 @@ export default function PerformancePage() {
 
       {/* Charts Row 1 */}
       <motion.div variants={itemVariants}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Revenue & Forecast */}
           <motion.div variants={cardHoverVariants} whileHover="hover">
             <Card className="glass-card">
@@ -229,7 +234,7 @@ export default function PerformancePage() {
                 <CardTitle className="text-slate-900 dark:text-slate-100">Revenue & Forecast</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
+                <div className="h-[300px] sm:h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenueData}>
                       <CartesianGrid stroke="rgba(148, 163, 184, .15)" vertical={false} />
@@ -253,7 +258,7 @@ export default function PerformancePage() {
                 <CardTitle className="text-slate-900 dark:text-slate-100">Pipeline by Stage</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
+                <div className="h-[300px] sm:h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       {categories && categories.length > 0 ? (
@@ -287,7 +292,7 @@ export default function PerformancePage() {
 
       {/* Charts Row 2 */}
       <motion.div variants={itemVariants}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Leads vs Deals */}
           <motion.div variants={cardHoverVariants} whileHover="hover">
             <Card className="glass-card">
@@ -295,7 +300,7 @@ export default function PerformancePage() {
                 <CardTitle className="text-slate-900 dark:text-slate-100">Leads vs. Deals (YTD)</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
+                <div className="h-[300px] sm:h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={leadsDealsData}>
                       <CartesianGrid stroke="rgba(148, 163, 184, .15)" vertical={false} />
@@ -320,7 +325,7 @@ export default function PerformancePage() {
                 <CardTitle className="text-slate-900 dark:text-slate-100">Aktivitäten & Events (letzte 12 Wochen)</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
+                <div className="h-[300px] sm:h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={weeksData}>
                       <CartesianGrid stroke="rgba(148, 163, 184, .15)" vertical={false} />
@@ -343,7 +348,7 @@ export default function PerformancePage() {
       <motion.div variants={itemVariants}>
         <Card className="glass-card">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-red-600 dark:text-red-400" /> AI Insights
               </CardTitle>
@@ -353,8 +358,8 @@ export default function PerformancePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex items-start space-x-3 p-4 bg-white/50 dark:bg-neutral-900/30 rounded-xl backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              <div className="flex items-start space-x-3 p-3.5 sm:p-4 bg-white/50 dark:bg-neutral-900/30 rounded-xl backdrop-blur-sm">
                 <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
                   <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
@@ -363,7 +368,7 @@ export default function PerformancePage() {
                   <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Consistent growth pattern with +12% YoY increase</p>
                           </div>
                         </div>
-              <div className="flex items-start space-x-3 p-4 bg-white/50 dark:bg-neutral-900/30 rounded-xl backdrop-blur-sm">
+              <div className="flex items-start space-x-3 p-3.5 sm:p-4 bg-white/50 dark:bg-neutral-900/30 rounded-xl backdrop-blur-sm">
                 <div className="h-8 w-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
                   <Target className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                       </div>
@@ -372,7 +377,7 @@ export default function PerformancePage() {
                   <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Consider increasing marketing efforts to maintain momentum</p>
                     </div>
               </div>
-              <div className="flex items-start space-x-3 p-4 bg-white/50 dark:bg-neutral-900/30 rounded-xl backdrop-blur-sm">
+              <div className="flex items-start space-x-3 p-3.5 sm:p-4 bg-white/50 dark:bg-neutral-900/30 rounded-xl backdrop-blur-sm">
                 <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                   <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
