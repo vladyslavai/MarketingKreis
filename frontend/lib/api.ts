@@ -62,4 +62,70 @@ export const userCategoriesAPI = {
     }),
 }
 
+// === Admin API ===
+
+export type AdminUser = {
+  id: number
+  email: string
+  role: string
+  isVerified: boolean
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
+export type AdminUsersResponse = {
+  items: AdminUser[]
+  total: number
+  skip: number
+  limit: number
+}
+
+export type AdminSeedStatus = {
+  users: {
+    total: number
+    admins: number
+  }
+  crm: {
+    companies: number
+    contacts: number
+    deals: number
+  }
+  activities: {
+    activities: number
+    calendarEntries: number
+  }
+  performance: {
+    metrics: number
+  }
+}
+
+export type AdminUserUpdatePayload = {
+  email?: string
+  role?: "user" | "editor" | "admin"
+  is_verified?: boolean
+  new_password?: string
+}
+
+export const adminAPI = {
+  getSeedStatus: () => request<AdminSeedStatus>(`/admin/seed-status`),
+  getUsers: (params?: { skip?: number; limit?: number; search?: string; role?: string }) => {
+    const searchParams = new URLSearchParams()
+    if (params?.skip != null) searchParams.set("skip", String(params.skip))
+    if (params?.limit != null) searchParams.set("limit", String(params.limit))
+    if (params?.search) searchParams.set("search", params.search)
+    if (params?.role) searchParams.set("role", params.role)
+    const qs = searchParams.toString()
+    return request<AdminUsersResponse>(`/admin/users${qs ? `?${qs}` : ""}`)
+  },
+  updateUser: (id: number, payload: AdminUserUpdatePayload) =>
+    request<AdminUser>(`/admin/users/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  deleteUser: (id: number) =>
+    request<{ ok: boolean; id: number }>(`/admin/users/${id}`, {
+      method: "DELETE",
+    }),
+}
+
 

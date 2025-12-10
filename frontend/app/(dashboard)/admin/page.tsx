@@ -5,7 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useJobsApi } from "@/hooks/use-uploads-api"
-import { userCategoriesAPI, apiBase, crmAPI, companiesAPI, contactsAPI, dealsAPI } from "@/lib/api"
+import {
+  userCategoriesAPI,
+  apiBase,
+  crmAPI,
+  companiesAPI,
+  contactsAPI,
+  dealsAPI,
+  adminAPI,
+  AdminUser,
+  AdminSeedStatus,
+} from "@/lib/api"
 import { Shield, Server, Settings, PlayCircle, RefreshCw, Database, Wrench, Flag, Info, Users, Briefcase, Contact2, Tag, Plus, FlaskConical, PanelLeft, Bug, Bot, Globe, Clock3, Monitor, Sun, Moon, Wifi, Grid3X3, Lock } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
@@ -22,6 +32,17 @@ export default function AdminPage() {
   const [categories, setCategories] = React.useState<{ name: string; color: string }[]>([])
   const [savingCats, setSavingCats] = React.useState(false)
   const [flags, setFlags] = React.useState<Record<string, boolean>>({})
+  const [seedStatus, setSeedStatus] = React.useState<AdminSeedStatus | null>(null)
+  const [seedLoading, setSeedLoading] = React.useState(false)
+  const [seedError, setSeedError] = React.useState<string | null>(null)
+  const [adminUsers, setAdminUsers] = React.useState<AdminUser[]>([])
+  const [usersTotal, setUsersTotal] = React.useState(0)
+  const [usersLoading, setUsersLoading] = React.useState(false)
+  const [usersError, setUsersError] = React.useState<string | null>(null)
+  const [userSearch, setUserSearch] = React.useState("")
+  const [userRoleFilter, setUserRoleFilter] = React.useState<"" | "user" | "editor" | "admin">("")
+  const [updatingUserId, setUpdatingUserId] = React.useState<number | null>(null)
+  const [deletingUserId, setDeletingUserId] = React.useState<number | null>(null)
   const [viewport, setViewport] = React.useState<{ w: number; h: number; dpr: number; online: boolean }>({ w: 0, h: 0, dpr: 1, online: true })
   const prefersDark = typeof window !== "undefined" ? window.matchMedia("(prefers-color-scheme: dark)").matches : false
 
@@ -205,6 +226,50 @@ export default function AdminPage() {
     }
   }
 
+  const loadSeedStatus = async () => {
+    setSeedLoading(true)
+    setSeedError(null)
+    try {
+      const s = await adminAPI.getSeedStatus()
+      setSeedStatus(s)
+    } catch (e: any) {
+      setSeedError(e?.message || "Fehler beim Laden des Seed‑Status")
+    } finally {
+      setSeedLoading(false)
+    }
+  }
+
+  const loadUsers = async (overrides?: { search?: string; role?: "" | "user" | "editor" | "admin" }) => {
+    const search = overrides?.search !== undefined ? overrides.search : userSearch
+    const role = overrides?.role !== undefined ? overrides.role : userRoleFilter
+    setUsersLoading(true)
+    setUsersError(null)
+    try {
+      const res = await adminAPI.getUsers({
+        skip: 0,
+        limit: 100,
+        search: search.trim() || undefined,
+        role: role || undefined,
+      })
+      setAdminUsers(res.items || [])
+      setUsersTotal(res.total || (res.items ? res.items.length : 0))
+    } catch (e: any) {
+      setUsersError(e?.message || "Fehler beim Laden der Benutzer")
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  React.useEffect(() => {
+    loadSeedStatus()
+  }, [])
+
+  React.useEffect(() => {
+    if (activeTab === "users") {
+      loadUsers()
+    }
+  }, [activeTab])
+
   const jobsSummary = React.useMemo(() => {
     const total = jobs.length
     const by = (s: string) => jobs.filter((j) => j.status === (s as any)).length
@@ -216,6 +281,65 @@ export default function AdminPage() {
       failed: by("failed"),
     }
   }, [jobs])
+
+  const handleChangeRole = async (user: AdminUser, role: "user" | "editor" | "admin") => {
+    if (user.role === role) return
+    setUpdatingUserId(user.id)
+    try {
+      const updated = await adminAPI.updateUser(user.id, { role })
+      setAdminUsers((prev) => prev.map((u) => (u.id === user.id ? updated : u)))
+    } catch (e: any) {
+      alert(e?.message || "Rolle konnte nicht aktualisiert werden")
+    } finally {
+      setUpdatingUserId(null)
+    }
+  }
+
+  const handleToggleVerified = async (user: AdminUser) => {
+    setUpdatingUserId(user.id)
+    try {
+      const updated = await adminAPI.updateUser(user.id, { is_verified: !user.isVerified })
+      setAdminUsers((prev) => prev.map((u) => (u.id === user.id ? updated : u)))
+    } catch (e: any) {
+      alert(e?.message || "Verifizierungsstatus konnte nicht aktualisiert werden")
+    } finally {
+      setUpdatingUserId(null)
+    }
+  }
+
+  const handleResetPassword = async (user: AdminUser) => {
+    const value = window.prompt(`Neues Passwort für ${user.email}`, "")
+    if (value === null) return
+    const pwd = value.trim()
+    if (pwd.length < 6) {
+      alert("Passwort muss mindestens 6 Zeichen haben")
+      return
+    }
+    setUpdatingUserId(user.id)
+    try {
+      const updated = await adminAPI.updateUser(user.id, { new_password: pwd })
+      setAdminUsers((prev) => prev.map((u) => (u.id === user.id ? updated : u)))
+      alert("Passwort aktualisiert")
+    } catch (e: any) {
+      alert(e?.message || "Passwort konnte nicht aktualisiert werden")
+    } finally {
+      setUpdatingUserId(null)
+    }
+  }
+
+  const handleDeleteUser = async (user: AdminUser) => {
+    if (!window.confirm(`Benutzer ${user.email} wirklich löschen?`)) return
+    setDeletingUserId(user.id)
+    try {
+      await adminAPI.deleteUser(user.id)
+      setAdminUsers((prev) => prev.filter((u) => u.id !== user.id))
+      setUsersTotal((prev) => Math.max(0, prev - 1))
+    } catch (e: any) {
+      alert(e?.message || "Benutzer konnte nicht gelöscht werden")
+    } finally {
+      setDeletingUserId(null)
+    }
+  }
 
   const addCategory = () => {
     setCategories(prev => [...prev, { name: "", color: "#3b82f6" }])
@@ -310,6 +434,7 @@ export default function AdminPage() {
           <TabsTrigger value="overview">Übersicht</TabsTrigger>
           <TabsTrigger value="jobs">Jobs</TabsTrigger>
           <TabsTrigger value="data">Daten</TabsTrigger>
+          <TabsTrigger value="users">Benutzer</TabsTrigger>
           <TabsTrigger value="flags">Flags</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
@@ -591,6 +716,235 @@ export default function AdminPage() {
                     </div>
                   </div>
                 ))
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* USERS */}
+        <TabsContent value="users" className="space-y-8">
+          <Card className="glass-card">
+            <CardHeader className="p-6 pb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/30 to-blue-500/30 border border-white/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <CardTitle>Benutzerverwaltung</CardTitle>
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    Rollen, Verifizierung und Zugänge zentral steuern
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Suche nach E‑Mail…"
+                    className="h-9 w-44 sm:w-56"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        loadUsers({ search: (e.target as HTMLInputElement).value })
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="glass-card"
+                    onClick={() => loadUsers()}
+                    disabled={usersLoading}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" /> Laden
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-slate-400">Rolle:</span>
+                  {[
+                    { key: "", label: "Alle" },
+                    { key: "user", label: "User" },
+                    { key: "editor", label: "Editor" },
+                    { key: "admin", label: "Admin" },
+                  ].map((r) => (
+                    <button
+                      key={r.key || "all"}
+                      type="button"
+                      onClick={() => {
+                        const next = r.key as "" | "user" | "editor" | "admin"
+                        setUserRoleFilter(next)
+                        loadUsers({ role: next })
+                      }}
+                      className={`px-3 py-1 rounded-full border text-[11px] font-medium transition ${
+                        userRoleFilter === r.key
+                          ? "bg-white/15 border-white/30 text-slate-100"
+                          : "bg-transparent border-white/15 text-slate-400 hover:bg-white/5"
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 pt-0 space-y-6">
+              {seedStatus && (
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-slate-400">Benutzer gesamt</div>
+                      <div className="mt-1 text-lg font-semibold text-slate-100">{seedStatus.users.total}</div>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-slate-400">Admins</div>
+                      <div className="mt-1 text-lg font-semibold text-slate-100">{seedStatus.users.admins}</div>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-slate-400">CRM Datensätze</div>
+                      <div className="mt-1 text-lg font-semibold text-slate-100">
+                        {seedStatus.crm.companies + seedStatus.crm.contacts + seedStatus.crm.deals}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-slate-400">Aktivitäten / Kalender</div>
+                      <div className="mt-1 text-lg font-semibold text-slate-100">
+                        {seedStatus.activities.activities + seedStatus.activities.calendarEntries}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-3"
+                      onClick={loadSeedStatus}
+                      disabled={seedLoading}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {seedError && (
+                <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2">
+                  {seedError}
+                </div>
+              )}
+              {usersError && (
+                <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2">
+                  {usersError}
+                </div>
+              )}
+              {usersLoading ? (
+                <div className="py-10 text-sm text-slate-400">Lade Benutzer…</div>
+              ) : adminUsers.length === 0 ? (
+                <div className="py-12 text-center text-sm text-slate-400">
+                  Keine Benutzer gefunden. Passe Filter oder Suche an.
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-white/10">
+                  <table className="w-full text-sm">
+                    <thead className="bg-white/5">
+                      <tr className="text-left text-slate-400 uppercase text-xs tracking-wider">
+                        <th className="py-3.5 px-5 font-medium">ID</th>
+                        <th className="py-3.5 px-5 font-medium">E‑Mail</th>
+                        <th className="py-3.5 px-5 font-medium">Rolle</th>
+                        <th className="py-3.5 px-5 font-medium">Verifiziert</th>
+                        <th className="py-3.5 px-5 font-medium">Erstellt</th>
+                        <th className="py-3.5 px-5 font-medium text-right">Aktionen</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/10">
+                      {adminUsers.map((u) => (
+                        <tr key={u.id} className="hover:bg-white/5 transition-colors">
+                          <td className="py-3.5 px-5 font-mono text-xs text-slate-400">{u.id}</td>
+                          <td className="py-3.5 px-5">
+                            <div className="text-sm text-slate-100 truncate max-w-xs">{u.email}</div>
+                          </td>
+                          <td className="py-3.5 px-5">
+                            <select
+                              className="bg-transparent border border-white/15 rounded-md px-2 py-1 text-xs text-slate-100"
+                              value={u.role}
+                              onChange={(e) =>
+                                handleChangeRole(
+                                  u,
+                                  e.target.value as "user" | "editor" | "admin"
+                                )
+                              }
+                              disabled={updatingUserId === u.id || deletingUserId === u.id}
+                            >
+                              <option value="user">user</option>
+                              <option value="editor">editor</option>
+                              <option value="admin">admin</option>
+                            </select>
+                          </td>
+                          <td className="py-3.5 px-5">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleVerified(u)}
+                              disabled={updatingUserId === u.id || deletingUserId === u.id}
+                              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+                                u.isVerified
+                                  ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/40"
+                                  : "bg-slate-500/10 text-slate-200 border-slate-500/40"
+                              }`}
+                            >
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  u.isVerified ? "bg-emerald-400" : "bg-slate-400"
+                                }`}
+                              />
+                              {u.isVerified ? "Verifiziert" : "Unbestätigt"}
+                            </button>
+                          </td>
+                          <td className="py-3.5 px-5 text-xs text-slate-400">
+                            {u.createdAt ? new Date(u.createdAt).toLocaleString("de-DE") : "—"}
+                          </td>
+                          <td className="py-3.5 px-5">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs"
+                                onClick={() => handleResetPassword(u)}
+                                disabled={updatingUserId === u.id || deletingUserId === u.id}
+                              >
+                                Passwort
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs border-red-500/40 text-red-300 hover:bg-red-500/10"
+                                onClick={() => handleDeleteUser(u)}
+                                disabled={updatingUserId === u.id || deletingUserId === u.id}
+                              >
+                                Löschen
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="flex items-center justify-between px-5 py-3 text-xs text-slate-400">
+                    <span>
+                      Zeigt {adminUsers.length} von {usersTotal} Benutzer(n)
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="glass-card"
+                      onClick={() => loadUsers()}
+                      disabled={usersLoading}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Neu laden
+                    </Button>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
