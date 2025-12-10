@@ -97,12 +97,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             </h2>
           )}
           <nav className="space-y-1">
-            {navItems
-              .filter((item) => {
-                if (item.href === "/admin" && user?.role !== "admin") return false
-                return true
-              })
-              .map((item) => {
+            {navItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
