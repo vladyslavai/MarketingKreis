@@ -43,11 +43,8 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 p-4 sm:p-5 shadow-[0_20px_80px_-24px_rgba(56,189,248,0.25)]"
+      className="space-y-4"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(94,234,212,0.08),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(129,140,248,0.12),transparent_32%),radial-gradient(circle_at_50%_80%,rgba(236,72,153,0.08),transparent_30%)]" />
-
-      <div className="relative space-y-4">
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Icon + text */}
