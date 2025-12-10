@@ -64,5 +64,10 @@ export function useActivitiesApi() {
   }
 }
 
+// Default export helper for components that prefer default import style
+export default function useActivitiesApiHook() {
+  return useActivitiesApi()
+}
+
 
 

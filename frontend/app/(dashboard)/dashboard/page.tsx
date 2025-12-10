@@ -19,7 +19,7 @@ import {
 	ArrowRight
 } from "lucide-react"
 import { companiesAPI, contactsAPI, dealsAPI, crmAPI } from "@/lib/api"
-import { useActivitiesApi } from "@/hooks/use-activities-api"
+import useActivitiesApi from "@/hooks/use-activities-api"
 import { useCalendarApi } from "@/hooks/use-calendar-api"
 import { sync } from "@/lib/sync"
 import { getCategoryColor } from "@/lib/colors"

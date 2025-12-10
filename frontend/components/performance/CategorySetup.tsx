@@ -37,26 +37,22 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="space-y-3 text-center">
-        <div className="flex justify-center">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/5 backdrop-blur">
-            <Palette className="h-5 w-5 text-violet-300" />
+    <div className="space-y-3">
+      {/* Header – aligned like 'Aktuelle Aktivitäten' card */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <Palette className="h-3.5 w-3.5 text-violet-300" />
+            <span>Kategorien einrichten</span>
           </div>
-        </div>
-        <div className="space-y-1 max-w-sm mx-auto">
-          <h3 className="text-lg sm:text-xl font-semibold leading-tight text-slate-50">
-            Kategorien einrichten
-          </h3>
-          <p className="text-sm text-slate-400 leading-snug">
+          <p className="text-xs text-slate-400 leading-snug">
             Definieren Sie bis zu fünf individuelle Kategorien. Die Farben erscheinen im Marketing‑Kreis,
             in Badges und Auswertungen.
           </p>
         </div>
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-100 shadow-[0_10px_30px_-18px_rgba(139,92,246,0.6)]">
-            ✦ Empfohlen für den Start
+        <div className="shrink-0">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/35 bg-violet-500/10 px-3 py-1 text-[10px] font-medium text-violet-100">
+            ✦ Empfohlen
           </div>
         </div>
       </div>

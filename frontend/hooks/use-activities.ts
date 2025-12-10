@@ -7,13 +7,17 @@ import { sync } from "@/lib/sync"
 import * as React from "react"
 
 const fetcher = async (url: string) => {
-	const res = await authFetch(url)
-	if (!res.ok) throw new Error(`HTTP ${res.status}`)
-	try {
-		return await res.json()
-	} catch {
-		return []
-	}
+  const res = await authFetch(url)
+  if (!res.ok) {
+    // In Dev/Preview we не хотим ломать весь UI из-за 500 — просто вернём пустой список.
+    console.error("Failed to load activities", res.status)
+    return []
+  }
+  try {
+    return await res.json()
+  } catch {
+    return []
+  }
 }
 
 export function useActivities() {
@@ -150,14 +154,15 @@ export function useActivities() {
     }
 
     return {
-        activities,
-        loading: isLoading,
-        error: error ? (error as Error).message : null,
-        addActivity,
-        updateActivity,
-        deleteActivity,
-        moveActivity,
-        refetch: async () => { await mutate(); sync.emit('activities:changed') },
+      activities,
+      loading: isLoading,
+      // Если что-то пошло не так, показываем мягкую ошибку вместо падения всего экрана
+      error: error ? (error as Error).message : null,
+      addActivity,
+      updateActivity,
+      deleteActivity,
+      moveActivity,
+      refetch: async () => { await mutate(); sync.emit('activities:changed') },
     }
 }
 
