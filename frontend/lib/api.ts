@@ -45,25 +45,21 @@ export const crmAPI = {
   getStats: () => request<any>(`/crm/stats`),
 }
 
-// User Categories (production endpoints)
-export type UserCategory = { name: string; color: string }
+// User Categories persisted in backend
+export type UserCategory = {
+  id?: number
+  name: string
+  color: string
+  position?: number
+}
 
 export const userCategoriesAPI = {
-  get: async (): Promise<UserCategory[]> => {
-    try {
-      const res = await request<{ categories: UserCategory[] }>(`/user/categories`)
-      return res?.categories || []
-    } catch {
-      return []
-    }
-  },
-  put: async (categories: UserCategory[]): Promise<UserCategory[]> => {
-    const res = await request<{ categories: UserCategory[] }>(`/user/categories`, {
-      method: 'PUT',
+  get: () => request<UserCategory[]>(`/user/categories`),
+  put: (categories: UserCategory[]) =>
+    request<UserCategory[]>(`/user/categories`, {
+      method: "PUT",
       body: JSON.stringify({ categories }),
-    })
-    return res?.categories || []
-  },
+    }),
 }
 
 
