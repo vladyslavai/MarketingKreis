@@ -49,26 +49,34 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
 
       <div className="relative space-y-4">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3 sm:items-center">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          {/* Icon + text */}
+          <div className="flex flex-col items-center text-center gap-3 md:flex-row md:items-center md:text-left">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/5 backdrop-blur">
               <Palette className="h-5 w-5 text-violet-300" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-slate-50">Kategorien einrichten</h3>
-              <p className="text-sm text-slate-400">
-                Bis zu 5 individuelle Kategorien. Farben erscheinen im Kreis, in Badges und Auswertungen.
+            <div className="space-y-1 max-w-sm">
+              <h3 className="text-xl font-semibold leading-tight text-slate-50 md:text-lg">
+                Kategorien einrichten
+              </h3>
+              <p className="text-sm text-slate-400 leading-snug">
+                Definieren Sie bis zu fünf individuelle Kategorien. Die Farben erscheinen im Marketing‑Kreis,
+                in Badges und Auswertungen.
               </p>
             </div>
           </div>
-          <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-100 shadow-[0_10px_30px_-18px_rgba(139,92,246,0.6)]">
-            ✦ Empfohlen für den Start
+
+          {/* Badge */}
+          <div className="inline-flex w-full justify-center md:w-auto md:justify-end">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-100 shadow-[0_10px_30px_-18px_rgba(139,92,246,0.6)]">
+              ✦ Empfohlen für den Start
+            </div>
           </div>
         </div>
 
         {/* Categories list */}
         <div className="space-y-3">
-          {items.map((it, idx) => (
+            {items.map((it, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, x: -8 }}
@@ -120,7 +128,7 @@ export default function CategorySetup({ onReady }: { onReady?: (cats: UserCatego
               </Button>
             </motion.div>
           ))}
-        </div>
+            </div>
 
         {/* Footer actions */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
