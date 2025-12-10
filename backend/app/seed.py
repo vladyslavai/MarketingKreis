@@ -22,14 +22,21 @@ def seed() -> None:
 
     db: Session = SessionLocal()
     try:
-        if not db.query(User).filter(User.email == "admin@marketingkreis.ch").first():
+        admin = db.query(User).filter(User.email == "admin@marketingkreis.ch").first()
+        if not admin:
             admin = User(
                 email="admin@marketingkreis.ch",
                 role=UserRole.admin,
                 hashed_password=_hash_password("password123"),
+                is_verified=True,
             )
             db.add(admin)
             print("✓ Created admin user: admin@marketingkreis.ch / password123")
+        else:
+            # Ensure existing admin user has correct role and is marked as verified
+            admin.role = UserRole.admin
+            admin.is_verified = True
+            db.add(admin)
 
         if db.query(Activity).count() == 0:
             activities = [

@@ -90,8 +90,12 @@ async def login(request: Request, response: Response, db: Session = Depends(get_
     #     valid = False
     # if not valid:
     #     raise HTTPException(status_code=401, detail="Invalid credentials")
+    # Email verification check
+    # If SKIP_EMAIL_VERIFY=true – do not block logins.
+    # Also never block admin logins to avoid locking yourself out of the system.
     if not getattr(user, "is_verified", True):
-        raise HTTPException(status_code=403, detail="Email not verified")
+        if not getattr(settings, "skip_email_verify", False) and user.role != UserRole.admin:
+            raise HTTPException(status_code=403, detail="Email not verified")
 
     access_token = create_jwt(
         subject=str(user.id),
