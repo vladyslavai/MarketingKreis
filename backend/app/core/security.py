@@ -27,14 +27,17 @@ class CSRFMiddleware(BaseHTTPMiddleware):
 
         if origin:
             if self._regex and self._regex.match(origin):
+                # explicitly allowed by regex
                 pass
             elif not any(origin.startswith(a) for a in self.allowed):
-            return Response("Forbidden (CSRF origin)", status_code=403)
+                return Response("Forbidden (CSRF origin)", status_code=403)
+
         if referer:
             if self._regex and self._regex.match(referer):
+                # explicitly allowed by regex
                 pass
             elif not any(referer.startswith(a) for a in self.allowed):
-            return Response("Forbidden (CSRF referer)", status_code=403)
+                return Response("Forbidden (CSRF referer)", status_code=403)
 
         return await call_next(request)
 
