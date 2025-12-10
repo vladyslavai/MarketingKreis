@@ -74,7 +74,7 @@ export default function DashboardPage() {
 
 	if (isLoading) {
 		return (
-			<div className="max-w-7xl mx-auto p-8 space-y-6">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 				<Skeleton className="h-16 w-80" />
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 					{[...Array(8)].map((_, i) => <Skeleton key={i} className="h-32" />)}
@@ -103,19 +103,19 @@ export default function DashboardPage() {
 	]
 
 	return (
-		<motion.div className="max-w-7xl mx-auto p-8 space-y-8" variants={containerVariants} initial="hidden" animate="visible">
+		<motion.div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8" variants={containerVariants} initial="hidden" animate="visible">
 			<motion.div variants={itemVariants} className="relative">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-6">
-						<div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center backdrop-blur-sm">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div className="flex items-center gap-4 sm:gap-6">
+						<div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center backdrop-blur-sm">
 							<LayoutDashboard className="h-8 w-8 text-blue-600 dark:text-blue-400" />
 						</div>
 						<div>
-							<h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100">Dashboard</h1>
-							<p className="text-slate-600 dark:text-slate-400 mt-1">Willkommen bei Marketing Kreis Platform</p>
+							<h1 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100">Dashboard</h1>
+							<p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">Willkommen bei Marketing Kreis Platform</p>
 						</div>
 					</div>
-					<Badge className="glass-card px-4 py-2 text-sm font-medium">KABOOM</Badge>
+					<Badge className="glass-card px-4 py-2 text-sm font-medium self-start sm:self-auto">KABOOM</Badge>
 				</div>
 			</motion.div>
 
