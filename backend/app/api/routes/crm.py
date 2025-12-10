@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
 
 from app.db.session import get_db_session
 from app.models.company import Company
@@ -50,6 +50,27 @@ def get_crm_stats(db: Session = Depends(get_db_session)):
         "wonValue": 0,
         "conversionRate": 0,
     }
+
+
+@router.get("/users")
+def list_users_stub() -> List[Dict[str, Any]]:
+    """
+    Lightweight stub endpoint used by the calendar UI to populate selects.
+
+    Реальных пользователей в Python-бэкенде пока нет, поэтому просто
+    возвращаем пустой список, чтобы не засорять логи 404.
+    """
+    return []
+
+
+@router.get("/projects")
+def list_projects_stub() -> List[Dict[str, Any]]:
+    """
+    Lightweight stub endpoint used by the calendar UI to populate selects.
+
+    Реальных проектов пока нет — возвращаем пустой список.
+    """
+    return []
 
 
 @router.post("/companies", response_model=CompanyOut)
