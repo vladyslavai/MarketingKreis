@@ -16,9 +16,7 @@ import { getWeek } from "date-fns"
 
 export default function PerformancePage() {
   const [loading, setLoading] = useState(true)
-  const [deals, setDeals] = useState<any[]>([])
-  const [activities, setActivities] = useState<any[]>([])
-  const [events, setEvents] = useState<any[]>([])
+  const [metrics, setMetrics] = useState<any | null>(null)
   const { categories } = useUserCategories()
 
   // Simple micro-sparkline SVG for KPI cards
@@ -55,12 +53,13 @@ export default function PerformancePage() {
   const load = async () => {
     try {
       setLoading(true)
-      const dealsData = (crmAPI as any).getDeals ? await (crmAPI as any).getDeals() : await authFetch<any[]>("/crm/deals").then((r) => r.json())
-      const activitiesData = await authFetch<any[]>("/activities").then((r) => r.json())
-      const eventsData = await authFetch<any[]>("/calendar").then((r) => r.json())
-      setDeals(dealsData || [])
-      setActivities(activitiesData || [])
-      setEvents(eventsData || [])
+      const res = await authFetch("/performance")
+      if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || `Failed to load performance data (${res.status})`)
+      }
+      const data = await res.json().catch(() => null)
+      setMetrics(data || null)
     } catch (e) {
       console.error("Error loading performance data:", e)
     } finally {
@@ -92,7 +91,7 @@ export default function PerformancePage() {
   const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } }
   const cardHoverVariants = { hover: { scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } } }
 
-  if (loading) {
+  if (loading || !metrics) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Skeleton className="h-16 w-80" />
@@ -111,42 +110,30 @@ export default function PerformancePage() {
   }
 
   const chf = (v: number) => `CHF ${Math.round(v).toLocaleString()}`
-  const currentYear = new Date().getFullYear()
-  const monthLabels = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
 
-  const totalRevenue = deals.filter((d: any) => String(d.stage || "").toLowerCase() === "won").reduce((s: number, d: any) => s + (Number(d.value) || 0), 0)
-  const totalForecast = deals.reduce((s: number, d: any) => s + (Number(d.value) || 0) * ((Number(d.probability) || 0) / 100), 0)
-  const openDeals = deals.filter((d: any) => !["won", "lost"].includes(String(d.stage || "").toLowerCase())).length
-  const conversionRate = deals.length > 0 ? (deals.filter((d: any) => String(d.stage || "").toLowerCase() === "won").length / deals.length) * 100 : 0
+  const totalRevenue = Number(metrics.totalRevenue || 0)
+  const totalForecast = Number(metrics.totalForecast || 0)
+  const openDeals = Number(metrics.openDeals || 0)
+  const conversionRate = Number(metrics.conversionRate || 0)
 
-  // kpiCards defined after data series below
+  const revenueData = (metrics.revenueSeries || []) as { month: string; revenue: number; forecast: number }[]
+  const leadsDealsData = (metrics.leadsDealsSeries || []) as { month: string; deals: number; leads: number; won: number }[]
+  const weeksData = (metrics.weeksSeries || []) as { week: string; events: number; activities: number }[]
 
-  const revenueData = monthLabels.map((label, idx) => {
-    const m = idx
-    const inMonth = (d: any) => d.expected_close_date && new Date(d.expected_close_date).getFullYear() === currentYear && new Date(d.expected_close_date).getMonth() === m
-    const wonAmount = deals.filter((d: any) => inMonth(d) && String(d.stage || "").toLowerCase() === "won").reduce((s: number, d: any) => s + (Number(d.value) || 0), 0)
-    const weightedForecast = deals.filter((d: any) => inMonth(d)).reduce((s: number, d: any) => s + (Number(d.value) || 0) * ((Number(d.probability) || 0) / 100), 0)
-    return { month: label, revenue: wonAmount, forecast: weightedForecast }
-  })
-
-  const pipelineData = [
-    { name: "Lead", value: deals.filter((d) => String(d.stage).toLowerCase() === "lead").length, color: "#3b82f6" },
-    { name: "Qualified", value: deals.filter((d) => String(d.stage).toLowerCase() === "qualified").length, color: "#8b5cf6" },
-    { name: "Proposal", value: deals.filter((d) => String(d.stage).toLowerCase() === "proposal").length, color: "#ec4899" },
-    { name: "Negotiation", value: deals.filter((d) => String(d.stage).toLowerCase() === "negotiation").length, color: "#f59e0b" },
-    { name: "Won", value: deals.filter((d) => String(d.stage).toLowerCase() === "won").length, color: "#10b981" },
-  ]
+  const rawPipeline = (metrics.pipelineByStage || []) as { name: string; value: number }[]
+  const stageColors: Record<string, string> = {
+    Lead: "#3b82f6",
+    Qualified: "#8b5cf6",
+    Proposal: "#ec4899",
+    Negotiation: "#f59e0b",
+    Won: "#10b981",
+  }
+  const pipelineData = rawPipeline.map((p) => ({
+    ...p,
+    color: stageColors[p.name] || "#64748b",
+  }))
   const filteredPipeline = pipelineData.filter((d) => d.value > 0)
   const totalPipelineCount = filteredPipeline.reduce((s, d) => s + d.value, 0)
-
-  const leadsDealsData = monthLabels.map((label, idx) => {
-    const month = idx
-    const inMonth = (d: any) => d.expected_close_date && new Date(d.expected_close_date).getFullYear() === currentYear && new Date(d.expected_close_date).getMonth() === month
-    const dealsInMonth = deals.filter(inMonth)
-    const leadsInMonth = deals.filter((d: any) => inMonth(d) && String(d.stage || "").toLowerCase() === "lead")
-    const wonInMonth = deals.filter((d: any) => inMonth(d) && String(d.stage || "").toLowerCase() === "won")
-    return { month: label, deals: dealsInMonth.length, leads: leadsInMonth.length, won: wonInMonth.length }
-  })
 
   const kpiCards = [
     { title: "Revenue (YTD)", value: chf(totalRevenue), icon: DollarSign, color: "text-green-600 dark:text-green-400", bgColor: "bg-green-50 dark:bg-green-900/20", change: "+12%", series: revenueData.map(d=>d.revenue), stroke:"#10b981", from:"#34d399", to:"#065f46" },
@@ -154,18 +141,6 @@ export default function PerformancePage() {
     { title: "Open Deals", value: openDeals.toString(), icon: Handshake, color: "text-purple-600 dark:text-purple-400", bgColor: "bg-purple-50 dark:bg-purple-900/20", change: "+3", series: leadsDealsData.map(d=>d.deals), stroke:"#8b5cf6", from:"#d8b4fe", to:"#581c87" },
     { title: "Conversion Rate", value: `${conversionRate.toFixed(1)}%`, icon: Target, color: "text-orange-600 dark:text-orange-400", bgColor: "bg-orange-50 dark:bg-orange-900/20", change: "+2.1%", series: leadsDealsData.map(d=>d.won), stroke:"#f59e0b", from:"#fbbf24", to:"#7c2d12" },
   ]
-
-  const weeksBack = 12
-  const now = new Date()
-  const weeksData = Array.from({ length: weeksBack }).map((_, i) => {
-    const date = new Date(now)
-    date.setDate(now.getDate() - (weeksBack - 1 - i) * 7)
-    const week = getWeek(date, { weekStartsOn: 1 })
-    const weekLabel = `KW${String(week).padStart(2, "0")}`
-    const eventsCount = events.filter((e: any) => e.start && getWeek(new Date(e.start), { weekStartsOn: 1 }) === week).length
-    const activitiesCount = activities.filter((a: any) => (a.start && getWeek(new Date(a.start), { weekStartsOn: 1 }) === week) || (a.created_at && getWeek(new Date(a.created_at), { weekStartsOn: 1 }) === week)).length
-    return { week: weekLabel, events: eventsCount, activities: activitiesCount }
-  })
 
   // Если нет сохранённых категорий — показываем мастер настройки
   if (categories && categories.length === 0) {
