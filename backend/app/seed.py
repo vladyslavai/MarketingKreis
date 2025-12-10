@@ -43,11 +43,26 @@ def seed() -> None:
 
         db.commit()
 
-        # Seed some performance data if empty
-        any_activity = db.query(Activity).first()
-        if any_activity and db.query(Performance).count() == 0:
+        # Seed some generic performance metrics if empty
+        if db.query(Performance).count() == 0:
+            demo_rows = []
+            # Simple demo metrics for 8 months
             for i in range(1, 9):
-                db.add(Performance(activity_id=any_activity.id, leads=10*i, impressions=1000*i, reach=800*i, spend=250.0*i))
+                demo_rows.append(
+                    Performance(
+                        metric="revenue",
+                        value=10000 * i,
+                        period=f"2024-{i:02d}",
+                    )
+                )
+                demo_rows.append(
+                    Performance(
+                        metric="leads",
+                        value=50 * i,
+                        period=f"2024-{i:02d}",
+                    )
+                )
+            db.add_all(demo_rows)
             db.commit()
     finally:
         db.close()
