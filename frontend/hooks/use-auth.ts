@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
+// Always go through Next.js API routes on the same origin (`/api/auth/...`)
+const API_BASE = ''
 
-interface User {
+type User = {
   id: number
   email: string
-  name: string
   role: string
 }
 
@@ -28,8 +28,8 @@ export function useAuth() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch(`${API_URL || ''}/api/auth/profile`, {
-        credentials: 'include', // Send cookies
+      const response = await fetch(`${API_BASE}/api/auth/profile`, {
+        credentials: 'include',
       })
 
       if (response.ok) {
@@ -45,7 +45,7 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      await fetch(`${API_URL || ''}/api/auth/logout`, {
+      await fetch(`${API_BASE}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       })
@@ -64,4 +64,5 @@ export function useAuth() {
     refetch: fetchProfile,
   }
 }
+
 
