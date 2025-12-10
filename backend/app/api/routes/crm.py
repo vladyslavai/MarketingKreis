@@ -6,9 +6,11 @@ from app.db.session import get_db_session
 from app.models.company import Company
 from app.models.contact import Contact
 from app.models.deal import Deal
+from app.models.user import User
 from app.schemas.company import CompanyCreate, CompanyUpdate, CompanyOut
 from app.schemas.contact import ContactCreate, ContactUpdate, ContactOut
 from app.schemas.deal import DealCreate, DealUpdate, DealOut
+from app.schemas.user import UserOut
 
 
 router = APIRouter(prefix="/crm", tags=["crm"])
@@ -52,25 +54,35 @@ def get_crm_stats(db: Session = Depends(get_db_session)):
     }
 
 
-@router.get("/users")
-def list_users_stub() -> List[Dict[str, Any]]:
+@router.get("/users", response_model=List[UserOut])
+def list_users(db: Session = Depends(get_db_session)) -> List[User]:
     """
-    Lightweight stub endpoint used by the calendar UI to populate selects.
+    Production‑ready endpoint used by CRM/Calendar для выпадающих списков пользователей.
 
-    Реальных пользователей в Python-бэкенде пока нет, поэтому просто
-    возвращаем пустой список, чтобы не засорять логи 404.
+    Возвращает упорядоченный список всех пользователей без паролей.
     """
-    return []
+    return db.query(User).order_by(User.id.asc()).all()
 
 
-@router.get("/projects")
-def list_projects_stub() -> List[Dict[str, Any]]:
+@router.get("/projects", response_model=List[DealOut])
+def list_projects(
+    skip: int = 0,
+    limit: int = 100,
+    company_id: Optional[int] = None,
+    db: Session = Depends(get_db_session),
+) -> List[Deal]:
     """
-    Lightweight stub endpoint used by the calendar UI to populate selects.
+    Production‑ready endpoint, который переиспользует CRM сделки как "проекты".
 
-    Реальных проектов пока нет — возвращаем пустой список.
+    - Используется календарём для поля "Projekt"
+    - Возвращает те же объекты, что и /crm/deals (DealOut), чтобы фронтенд мог
+      брать id и title.
     """
-    return []
+    q = db.query(Deal)
+    if company_id:
+        q = q.filter(Deal.company_id == company_id)
+    # По умолчанию не фильтруем по стадии, чтобы можно было привязать событие к любому deal
+    return q.offset(skip).limit(limit).all()
 
 
 @router.post("/companies", response_model=CompanyOut)
