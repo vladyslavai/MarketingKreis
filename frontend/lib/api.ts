@@ -54,12 +54,21 @@ export type UserCategory = {
 }
 
 export const userCategoriesAPI = {
-  get: () => request<UserCategory[]>(`/user/categories`),
-  put: (categories: UserCategory[]) =>
-    request<UserCategory[]>(`/user/categories`, {
+  get: async (): Promise<UserCategory[]> => {
+    const data = await request<any>(`/user/categories`)
+    if (Array.isArray(data)) return data as UserCategory[]
+    if (data && Array.isArray(data.categories)) return data.categories as UserCategory[]
+    return []
+  },
+  put: async (categories: UserCategory[]): Promise<UserCategory[]> => {
+    const data = await request<any>(`/user/categories`, {
       method: "PUT",
       body: JSON.stringify({ categories }),
-    }),
+    })
+    if (Array.isArray(data)) return data as UserCategory[]
+    if (data && Array.isArray(data.categories)) return data.categories as UserCategory[]
+    return []
+  },
 }
 
 // === Admin API ===

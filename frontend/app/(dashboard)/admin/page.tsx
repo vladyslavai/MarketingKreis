@@ -1,10 +1,12 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useJobsApi } from "@/hooks/use-uploads-api"
+import { useAuth } from "@/hooks/use-auth"
 import {
   userCategoriesAPI,
   apiBase,
@@ -20,6 +22,8 @@ import { Shield, Server, Settings, PlayCircle, RefreshCw, Database, Wrench, Flag
 import { Input } from "@/components/ui/input"
 
 export default function AdminPage() {
+  const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const { jobs, isLoading: jobsLoading, refresh: refreshJobs } = useJobsApi()
   const [activeTab, setActiveTab] = React.useState("overview")
   const [categoriesCount, setCategoriesCount] = React.useState<number>(0)
@@ -45,6 +49,18 @@ export default function AdminPage() {
   const [deletingUserId, setDeletingUserId] = React.useState<number | null>(null)
   const [viewport, setViewport] = React.useState<{ w: number; h: number; dpr: number; online: boolean }>({ w: 0, h: 0, dpr: 1, online: true })
   const prefersDark = typeof window !== "undefined" ? window.matchMedia("(prefers-color-scheme: dark)").matches : false
+
+  // Redirect non-admins away from this page
+  React.useEffect(() => {
+    if (authLoading) return
+    if (!user) {
+      router.replace("/signup?mode=login")
+      return
+    }
+    if (user.role !== "admin") {
+      router.replace("/dashboard")
+    }
+  }, [authLoading, user, router])
 
   // Tiny reusable micro charts for the overview cards
   function MicroBars({ data, dates, stroke, from, to }: { data: number[]; dates: string[]; stroke: string; from: string; to: string }) {
@@ -261,14 +277,16 @@ export default function AdminPage() {
   }
 
   React.useEffect(() => {
-    loadSeedStatus()
-  }, [])
+    if (!authLoading && user && user.role === "admin") {
+      loadSeedStatus()
+    }
+  }, [authLoading, user])
 
   React.useEffect(() => {
-    if (activeTab === "users") {
+    if (activeTab === "users" && !authLoading && user && user.role === "admin") {
       loadUsers()
     }
-  }, [activeTab])
+  }, [activeTab, authLoading, user])
 
   const jobsSummary = React.useMemo(() => {
     const total = jobs.length
@@ -392,6 +410,16 @@ export default function AdminPage() {
       prefersDark: window.matchMedia("(prefers-color-scheme: dark)").matches,
     }
     try { await navigator.clipboard.writeText(JSON.stringify(diag, null, 2)); alert("📋 Diagnostics kopiert") } catch { alert("❌ Kopieren fehlgeschlagen") }
+  }
+
+  if (authLoading || !user || user.role !== "admin") {
+    return (
+      <div className="p-10 md:p-12">
+        <div className="glass-card rounded-2xl border border-white/10 bg-white/5 px-6 py-10 text-center text-sm text-slate-400">
+          {authLoading ? "Lade Admin‑Bereich…" : "Kein Zugriff – du wirst weitergeleitet…"}
+        </div>
+      </div>
+    )
   }
 
   return (

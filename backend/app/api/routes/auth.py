@@ -163,7 +163,7 @@ def _decode_special(token: str) -> dict:
 @router.post("/register")
 def register(body: RegisterRequest, response: Response, db: Session = Depends(get_db_session)):
     settings = get_settings()
-    # Mode enforcement
+    # Mode enforcement / invited role
     invited_role = settings.default_role
     if settings.signup_mode == "invite_only":
         if not body.token:
@@ -185,20 +185,21 @@ def register(body: RegisterRequest, response: Response, db: Session = Depends(ge
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    # If this is the very first user in the system, make them admin
-    # This replaces the need for a separate seed step in demo setups.
+    # Determine role:
+    # - If this is the VERY FIRST user in the system → always admin (bootstrap)
+    # - Otherwise follow invited/default role
     try:
         total_users = db.query(User).count()
-        if total_users == 0:
-            role = UserRole.admin
     except Exception:
-        # If counting users fails for any reason, fall back to normal role logic
-        pass
+        total_users = 0
 
-    try:
-        role = UserRole(invited_role)
-    except Exception:
-        role = UserRole.user
+    if total_users == 0:
+        role = UserRole.admin
+    else:
+        try:
+            role = UserRole(invited_role)
+        except Exception:
+            role = UserRole.user
     user = User(email=body.email, hashed_password=_hash_password(body.password), role=role)
     db.add(user)
     db.commit()
