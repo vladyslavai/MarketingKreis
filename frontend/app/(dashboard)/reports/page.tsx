@@ -181,69 +181,76 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 pb-24 md:pb-8 space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-6 sm:p-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <Activity className="h-6 w-6 text-white" />
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
+              <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-semibold text-white">Reports</h1>
-              <p className="text-slate-300 text-sm">Live Business Überblick über CRM, Calendar, Activities und Uploads</p>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white">Reports</h1>
+              <p className="text-slate-300 text-xs sm:text-sm truncate">Live Business Überblick über CRM, Calendar, Activities und Uploads</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="border-white/20 text-slate-200" onClick={()=>{ load(); refetchActivities(); refreshCalendar(); refreshUploads(); refreshJobs(); }}>
-              <RefreshCw className="h-4 w-4 mr-2" /> Aktualisieren
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" className="border-white/20 text-slate-200 h-8 sm:h-9 text-xs sm:text-sm" onClick={()=>{ load(); refetchActivities(); refreshCalendar(); refreshUploads(); refreshJobs(); }}>
+              <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" /> <span className="hidden sm:inline">Aktualisieren</span>
             </Button>
-            <Button variant="outline" className="border-white/20 text-slate-200" onClick={()=> window.open('/api/reports/export?format=csv', '_blank') }>
-              <Download className="h-4 w-4 mr-2" /> CSV
+            <Button variant="outline" size="sm" className="border-white/20 text-slate-200 h-8 sm:h-9 text-xs sm:text-sm" onClick={()=> window.open('/api/reports/export?format=csv', '_blank') }>
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" /> <span className="hidden xs:inline">CSV</span>
             </Button>
-            <Button className="bg-white text-slate-900 hover:bg-white/90" onClick={()=> window.open('/api/reports/export?format=json', '_blank') }>
-              <Download className="h-4 w-4 mr-2" /> JSON
+            <Button size="sm" className="bg-white text-slate-900 hover:bg-white/90 h-8 sm:h-9 text-xs sm:text-sm" onClick={()=> window.open('/api/reports/export?format=json', '_blank') }>
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" /> <span className="hidden xs:inline">JSON</span>
             </Button>
           </div>
         </div>
 
         {/* Generator */}
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          {/* Presets */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400">Presets:</span>
-            {[
-              { k: "Heute", d: 0 },
-              { k: "7 Tage", d: 6 },
-              { k: "Monat", d: 29 },
-              { k: "Quartal", d: 89 },
-              { k: "Jahr", d: 364 },
-            ].map(p => (
-              <Button key={p.k} size="sm" variant="outline" className="border-white/15 text-slate-300"
-                onClick={()=> {
-                  const end = new Date()
-                  const start = new Date()
-                  start.setDate(end.getDate() - p.d)
-                  setFrom(start.toISOString().slice(0,10))
-                  setTo(end.toISOString().slice(0,10))
-                }}>{p.k}</Button>
-            ))}
+        <div className="mt-4 space-y-3">
+          {/* Presets - scrollable on mobile */}
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <div className="flex items-center gap-2 text-xs min-w-max">
+              <span className="text-slate-400">Presets:</span>
+              {[
+                { k: "Heute", d: 0 },
+                { k: "7 Tage", d: 6 },
+                { k: "Monat", d: 29 },
+                { k: "Quartal", d: 89 },
+                { k: "Jahr", d: 364 },
+              ].map(p => (
+                <Button key={p.k} size="sm" variant="outline" className="border-white/15 text-slate-300 h-7 sm:h-8 px-2 sm:px-3 text-xs"
+                  onClick={()=> {
+                    const end = new Date()
+                    const start = new Date()
+                    start.setDate(end.getDate() - p.d)
+                    setFrom(start.toISOString().slice(0,10))
+                    setTo(end.toISOString().slice(0,10))
+                  }}>{p.k}</Button>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-300">Zeitraum:</span>
-            <input type="date" value={from} onChange={(e)=>setFrom(e.target.value)} className="h-9 rounded-md bg-slate-900/60 border border-white/15 px-2 text-slate-200" />
-            <span className="text-slate-400">–</span>
-            <input type="date" value={to} onChange={(e)=>setTo(e.target.value)} className="h-9 rounded-md bg-slate-900/60 border border-white/15 px-2 text-slate-200" />
+          {/* Date range and comparison */}
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="text-slate-300">Zeitraum:</span>
+              <input type="date" value={from} onChange={(e)=>setFrom(e.target.value)} className="h-8 sm:h-9 rounded-md bg-slate-900/60 border border-white/15 px-2 text-slate-200 text-xs sm:text-sm" />
+              <span className="text-slate-400">–</span>
+              <input type="date" value={to} onChange={(e)=>setTo(e.target.value)} className="h-8 sm:h-9 rounded-md bg-slate-900/60 border border-white/15 px-2 text-slate-200 text-xs sm:text-sm" />
+            </div>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="text-slate-300">Vergleich:</span>
+              <StyledSelect value={compare} onChange={(e: any)=>setCompare(e.target.value as any)}>
+                <option value="none">Kein</option>
+                <option value="prev">Vorh. Zeitraum</option>
+                <option value="yoy">YoY</option>
+              </StyledSelect>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-300">Vergleich:</span>
-            <StyledSelect value={compare} onChange={(e: any)=>setCompare(e.target.value as any)}>
-              <option value="none">Kein</option>
-              <option value="prev">Vorh. Zeitraum</option>
-              <option value="yoy">YoY</option>
-            </StyledSelect>
-          </div>
-          <Button disabled={genLoading} className="bg-blue-600 hover:bg-blue-500" onClick={async()=>{
+          {/* Action buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+          <Button disabled={genLoading} size="sm" className="bg-blue-600 hover:bg-blue-500 h-8 sm:h-9 text-xs sm:text-sm" onClick={async()=>{
             try {
               setGenLoading(true)
               const ff = (()=>{ try { return JSON.parse(localStorage.getItem('featureFlags')||'{}') } catch { return {} } })()
@@ -272,10 +279,10 @@ export default function ReportsPage() {
           }}>
             {genLoading ? 'Generiere…' : 'Report generieren'}
           </Button>
-          <Button variant="outline" className="border-white/20 text-slate-200" onClick={()=> setSettingsOpen(v=>!v)}>{settingsOpen ? 'Einstellungen ▾' : 'Einstellungen ▸'}</Button>
+          <Button variant="outline" size="sm" className="border-white/20 text-slate-200 h-8 sm:h-9 text-xs sm:text-sm" onClick={()=> setSettingsOpen(v=>!v)}>{settingsOpen ? 'Einstellungen ▾' : 'Einstellungen ▸'}</Button>
           {reportHtml && (
             <>
-              <Button variant="outline" className="border-white/20 text-slate-200" onClick={()=>{
+              <Button variant="outline" size="sm" className="border-white/20 text-slate-200 h-8 sm:h-9 text-xs sm:text-sm" onClick={()=>{
                 openModal({
                   type: 'custom',
                   title: 'Report – Preview',
@@ -288,15 +295,15 @@ export default function ReportsPage() {
               }}>
                 👁️ Preview
               </Button>
-              <Button variant="outline" className="border-white/20 text-slate-200" onClick={()=>{
+              <Button variant="outline" size="sm" className="border-white/20 text-slate-200 h-8 sm:h-9 text-xs sm:text-sm" onClick={()=>{
                 const blob = new Blob([`<!doctype html><meta charset=\"utf-8\">${reportHtml}`], { type: 'text/html;charset=utf-8' })
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url; a.download = `report-${from||'all'}_${to||'all'}.html`; a.click(); URL.revokeObjectURL(url)
               }}>
-                <Download className="h-4 w-4 mr-2" /> Download HTML
+                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" /> <span className="hidden sm:inline">Download HTML</span>
               </Button>
-              <Button variant="outline" className="border-white/20 text-slate-200" onClick={()=>{
+              <Button variant="outline" size="sm" className="border-white/20 text-slate-200 h-8 sm:h-9 text-xs sm:text-sm" onClick={()=>{
                 const wrapper = `<!doctype html><html><head><meta charset='utf-8'><title>Report</title>
                 <style>@page{margin:18mm} body{background:#0b1220;color:#e5e7eb} @media print{body{background:white;color:black}}</style>
                 </head><body>${reportHtml}<script>window.onload=()=>{window.print(); setTimeout(()=>window.close(), 500)}</script></body></html>`
@@ -304,10 +311,11 @@ export default function ReportsPage() {
                 const url = URL.createObjectURL(blob)
                 window.open(url, '_blank')
               }}>
-                <Download className="h-4 w-4 mr-2" /> Download PDF
+                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" /> <span className="hidden sm:inline">Download PDF</span>
               </Button>
             </>
           )}
+          </div>
         </div>
         {settingsOpen && (
           <div className="mt-3 rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
@@ -343,7 +351,7 @@ export default function ReportsPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {kpis.map((k, i) => (
           <Card
             key={i}
@@ -351,15 +359,15 @@ export default function ReportsPage() {
             style={{ background: `linear-gradient(180deg, ${k.fillTo}, rgba(2,6,23,0.55))`, borderColor: k.border }}
           >
             <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ boxShadow: `0 12px 34px ${k.fillFrom}, inset 0 0 0 1px ${k.fillFrom}` }} />
-            <CardHeader className="pt-4 px-4 pb-2">
-              <CardTitle className={`${k.color} flex items-center gap-2 text-sm`}>
-                <k.icon className={`h-4 w-4 ${k.color}`} />
+            <CardHeader className="pt-3 sm:pt-4 px-3 sm:px-4 pb-1 sm:pb-2">
+              <CardTitle className={`${k.color} flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm`}>
+                <k.icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${k.color}`} />
                 {k.title}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0 px-4 pb-4">
-              <div className="text-2xl font-semibold text-white mt-1">{k.value}</div>
-              <div className="mt-3 h-12">
+            <CardContent className="pt-0 px-3 sm:px-4 pb-3 sm:pb-4">
+              <div className="text-lg sm:text-2xl font-semibold text-white mt-1">{k.value}</div>
+              <div className="mt-2 sm:mt-3 h-10 sm:h-12">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={k.data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <defs>

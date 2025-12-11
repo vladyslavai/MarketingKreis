@@ -118,27 +118,27 @@ export default function UploadsPage() {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 pb-24 md:pb-8 space-y-6 sm:space-y-8">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-6">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white/90 flex items-center gap-3">
-              <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-blue-400" />
+            <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-white/90 flex items-center gap-2 sm:gap-3">
+              <Upload className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 text-blue-400 shrink-0" />
               Uploads & Jobs
             </h1>
-            <p className="text-slate-300 mt-2">Datei-Uploads und Hintergrund-Jobs – Live Daten</p>
+            <p className="text-slate-300 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">Datei-Uploads und Hintergrund-Jobs – Live Daten</p>
           </div>
-          <div className="inline-flex items-center">
+          <div className="inline-flex items-center self-start">
             <input ref={inputRef} type="file" className="hidden" onChange={(e)=> onFiles(e.target.files)} />
-            <Button className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg hover:opacity-90" onClick={()=> inputRef.current?.click()}>
-              <Upload className="h-4 w-4 mr-2" />
+            <Button className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg hover:opacity-90 h-9 sm:h-10 text-xs sm:text-sm" onClick={()=> inputRef.current?.click()}>
+              <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               Datei hochladen
             </Button>
           </div>
         </div>
         {/* Compact stats bar */}
-        <div className="mt-4 flex flex-wrap gap-3 items-center justify-between rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-sm text-slate-200">
+        <div className="mt-3 sm:mt-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3 items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-slate-200">
           <span>📁 Uploads: {uploads.length}</span>
           <span>🗂 Dateien: {uploads.length}</span>
           <span>⚙️ Jobs: {jobs.length}</span>
@@ -148,15 +148,16 @@ export default function UploadsPage() {
 
       {/* Drag & Drop Area */}
       <Card className={`bg-white/5 border-white/10 backdrop-blur-xl ${dragOver ? 'ring-2 ring-blue-400/60' : ''}`}>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6">
           <div
-            className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center text-slate-300"
+            className="border-2 border-dashed border-white/20 rounded-xl p-6 sm:p-8 text-center text-slate-300 cursor-pointer"
+            onClick={()=> inputRef.current?.click()}
             onDragOver={(e)=>{ e.preventDefault(); setDragOver(true) }}
             onDragLeave={()=> setDragOver(false)}
             onDrop={(e)=>{ e.preventDefault(); setDragOver(false); onFiles(e.dataTransfer.files) }}
           >
-            <Upload className="h-10 w-10 mx-auto mb-3 text-blue-400" />
-            <div>Dateien hier ablegen oder klicken zum Auswählen</div>
+            <Upload className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 sm:mb-3 text-blue-400" />
+            <div className="text-sm sm:text-base">Dateien hier ablegen oder klicken zum Auswählen</div>
             {progress !== null && (
               <div className="mt-3 h-2 w-full rounded bg-white/10 overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: `${progress}%` }} />
@@ -298,36 +299,36 @@ export default function UploadsPage() {
       )}
 
       {/* Stats (secondary) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
         <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm text-slate-300 flex items-center gap-2"><HardDrive className="h-4 w-4 text-blue-400" /> Hochgeladen</CardTitle>
+          <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+            <CardTitle className="text-[10px] sm:text-xs md:text-sm text-slate-300 flex items-center gap-1.5 sm:gap-2"><HardDrive className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-400" /> Hochgeladen</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-white">{uploads.length}</p>
-            <p className="text-xs text-slate-400 mt-1">Dateien</p>
+          <CardContent className="p-3 sm:p-4 pt-0">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{uploads.length}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1">Dateien</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm text-slate-300">Jobs</CardTitle>
+          <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+            <CardTitle className="text-[10px] sm:text-xs md:text-sm text-slate-300">Jobs</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-blue-400">{jobs.length}</p>
-            <p className="text-xs text-slate-400 mt-1">Gesamt</p>
+          <CardContent className="p-3 sm:p-4 pt-0">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-400">{jobs.length}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1">Gesamt</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm text-slate-300 flex items-center gap-2"><Clock3 className="h-4 w-4 text-yellow-300" /> Aktive Jobs</CardTitle>
+          <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+            <CardTitle className="text-[10px] sm:text-xs md:text-sm text-slate-300 flex items-center gap-1.5 sm:gap-2"><Clock3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-300" /> Aktiv</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-400">
+          <CardContent className="p-3 sm:p-4 pt-0">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-400">
               {jobs.filter(j => j.status === 'processing').length}
             </p>
-            <p className="text-xs text-slate-400 mt-1">In Bearbeitung</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1">In Bearbeitung</p>
           </CardContent>
         </Card>
       </div>

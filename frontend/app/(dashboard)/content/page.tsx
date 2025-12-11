@@ -149,98 +149,106 @@ export default function ContentPage() {
   const filteredContents = contents.filter(matchesFilters)
 
   return (
-    <div className="space-y-8 p-6 md:p-8 min-h-screen">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-8 md:p-10 text-white shadow-2xl border border-white/10">
+    <div className="space-y-6 sm:space-y-8 p-4 sm:p-6 md:p-8 pb-24 md:pb-8 min-h-screen">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-4 sm:p-6 md:p-10 text-white shadow-2xl border border-white/10">
         <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-tr from-fuchsia-500/30 to-blue-500/30 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-16 h-64 w-64 rounded-full bg-gradient-to-tr from-cyan-500/30 to-emerald-500/30 blur-3xl" />
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="relative flex flex-col gap-4">
+          {/* Top row: back + title */}
+          <div className="flex items-center gap-3">
             <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Dashboard
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 h-8 px-2 sm:px-3">
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Dashboard</span>
               </Button>
             </Link>
-            <div className="h-8 w-px bg-white/10" />
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center border border-white/20 shadow">
-                <FileText className="h-5 w-5 text-white" />
+            <div className="h-6 w-px bg-white/10 hidden sm:block" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center border border-white/20 shadow shrink-0">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-semibold">Content Hub</h1>
-                <p className="text-sm text-white/70">Content Management</p>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-semibold">Content Hub</h1>
+                <p className="text-xs sm:text-sm text-white/70">Content Management</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="bg-white/10 text-white hover:bg-white/20">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="ghost" size="sm" className="bg-white/10 text-white hover:bg-white/20 h-8 text-xs sm:text-sm">
+              <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
             </Button>
-            <Button variant="ghost" size="sm" className="bg-white/10 text-white hover:bg-white/20">
-              <Download className="h-4 w-4 mr-2" />
-              Export
+            <Button variant="ghost" size="sm" className="bg-white/10 text-white hover:bg-white/20 h-8 text-xs sm:text-sm">
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Export</span>
             </Button>
-            <Button size="sm" className="bg-white text-slate-900 hover:bg-white/90" onClick={() => openModal({ type: "form", title: "Neuen Content hinzufügen", fields: [{ name: "title", type: "text", label: "Titel", required: true }], onSubmit: () => openModal({ type: "info", title: "Content erstellt!" }) })}>
-              <Plus className="h-4 w-4 mr-2" />
-              Neuer Content
+            <Button size="sm" className="bg-white text-slate-900 hover:bg-white/90 h-8 text-xs sm:text-sm ml-auto" onClick={() => openModal({ type: "form", title: "Neuen Content hinzufügen", fields: [{ name: "title", type: "text", label: "Titel", required: true }], onSubmit: () => openModal({ type: "info", title: "Content erstellt!" }) })}>
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              Neu
             </Button>
           </div>
         </div>
       </div>
 
       {/* Toolbar: tabs + search/filters + view toggle */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {(["ALL", ...statuses] as const).map((t) => {
-            const count = t === "ALL" ? contents.length : contents.filter(c => c.status === t).length
-            const active = statusTab === t
-            return (
-              <button
-                key={t}
-                onClick={() => setStatusTab(t as any)}
-                className={`px-3 py-1.5 rounded-full text-sm border transition ${active ? "bg-white/15 text-white border-white/30" : "bg-white/5 text-white/80 border-white/10 hover:bg-white/10"}`}
-              >
-                {t.toString().toUpperCase()} <span className="ml-1 text-white/60">({count})</span>
-              </button>
-            )
-          })}
+      <div className="flex flex-col gap-3">
+        {/* Status tabs - horizontal scroll on mobile */}
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <div className="flex gap-2 min-w-max">
+            {(["ALL", ...statuses] as const).map((t) => {
+              const count = t === "ALL" ? contents.length : contents.filter(c => c.status === t).length
+              const active = statusTab === t
+              return (
+                <button
+                  key={t}
+                  onClick={() => setStatusTab(t as any)}
+                  className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm border transition whitespace-nowrap ${active ? "bg-white/15 text-white border-white/30" : "bg-white/5 text-white/80 border-white/10 hover:bg-white/10"}`}
+                >
+                  {t.toString().toUpperCase()} <span className="ml-0.5 sm:ml-1 text-white/60">({count})</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Search and filters */}
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Suche Titel oder Tags…"
-            className="h-10 w-64 rounded-xl px-3 text-sm bg-white/10 dark:bg-slate-900/50 text-white placeholder:text-white/60 border border-white/20 dark:border-slate-700 focus:ring-blue-500/40"
+            placeholder="Suche Titel oder Tags..."
+            className="h-9 sm:h-10 w-full sm:w-56 lg:w-64 rounded-xl px-3 text-xs sm:text-sm bg-white/10 dark:bg-slate-900/50 text-white placeholder:text-white/60 border border-white/20 dark:border-slate-700 focus:ring-blue-500/40"
           />
-          <GlassSelect
-            value={String(typeFilter)}
-            onChange={(v) => setTypeFilter(v as any)}
-            options={[
-              { value: "all", label: "Alle Typen" },
-              { value: "blog", label: "Blog" },
-              { value: "social", label: "Social" },
-              { value: "video", label: "Video" },
-              { value: "email", label: "Email" },
-              { value: "asset", label: "Asset" },
-            ]}
-            className="w-44"
-          />
-          <GlassSelect
-            value={String(assignee)}
-            onChange={(v) => setAssignee(v)}
-            options={[{ value: "all", label: "Alle Bearbeiter" }, ...assignees.map(a => ({ value: a, label: a }))]}
-            className="w-56"
-          />
-          <div className="ml-1 inline-flex rounded-lg overflow-hidden border border-white/20">
-            <button onClick={() => setView("grid")} className={`px-3 h-9 text-sm ${view === "grid" ? "bg-white/20 text-white" : "bg-white/5 text-white/80"}`}>Grid</button>
-            <button onClick={() => setView("kanban")} className={`px-3 h-9 text-sm ${view === "kanban" ? "bg-white/20 text-white" : "bg-white/5 text-white/80"}`}>Kanban</button>
+          <div className="flex items-center gap-2 flex-1 sm:flex-none">
+            <GlassSelect
+              value={String(typeFilter)}
+              onChange={(v) => setTypeFilter(v as any)}
+              options={[
+                { value: "all", label: "Alle Typen" },
+                { value: "blog", label: "Blog" },
+                { value: "social", label: "Social" },
+                { value: "video", label: "Video" },
+                { value: "email", label: "Email" },
+                { value: "asset", label: "Asset" },
+              ]}
+              className="flex-1 sm:flex-none sm:w-36 lg:w-44"
+            />
+            <GlassSelect
+              value={String(assignee)}
+              onChange={(v) => setAssignee(v)}
+              options={[{ value: "all", label: "Alle Bearbeiter" }, ...assignees.map(a => ({ value: a, label: a }))]}
+              className="flex-1 sm:flex-none sm:w-40 lg:w-56"
+            />
+          </div>
+          <div className="inline-flex rounded-lg overflow-hidden border border-white/20 self-start">
+            <button onClick={() => setView("grid")} className={`px-2.5 sm:px-3 h-8 sm:h-9 text-xs sm:text-sm ${view === "grid" ? "bg-white/20 text-white" : "bg-white/5 text-white/80"}`}>Grid</button>
+            <button onClick={() => setView("kanban")} className={`px-2.5 sm:px-3 h-8 sm:h-9 text-xs sm:text-sm ${view === "kanban" ? "bg-white/20 text-white" : "bg-white/5 text-white/80"}`}>Kanban</button>
           </div>
         </div>
       </div>
 
       {/* KPI level with micro-sparklines */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { key: "total", title: "Total Content", value: contents.length, color: "text-blue-400", stroke: "#93c5fd", fillFrom: "rgba(147,197,253,.35)", fillTo: "rgba(30,58,138,.05)" },
           { key: "deals", title: "Deals as Content", value: deals.length, color: "text-cyan-400", stroke: "#67e8f9", fillFrom: "rgba(103,232,249,.35)", fillTo: "rgba(8,145,178,.05)" },
@@ -252,15 +260,15 @@ export default function ContentPage() {
             className="group relative overflow-hidden backdrop-blur-xl border rounded-2xl transition-all duration-300 hover:-translate-y-0.5 glass-card"
           >
             <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ boxShadow: `0 12px 34px ${k.fillFrom}, inset 0 0 0 1px ${k.fillFrom}` }} />
-            <CardHeader className="pt-4 px-4 pb-2">
-              <CardTitle className={`${k.color} flex items-center gap-2 text-sm`}>
-                <FileText className={`h-4 w-4 ${k.color}`} />
+            <CardHeader className="pt-3 sm:pt-4 px-3 sm:px-4 pb-1 sm:pb-2">
+              <CardTitle className={`${k.color} flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm`}>
+                <FileText className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${k.color}`} />
                 {k.title}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0 px-4 pb-4">
-              <div className="text-2xl font-semibold text-white mt-1">{k.value}</div>
-              <div className="mt-3 h-12">
+            <CardContent className="pt-0 px-3 sm:px-4 pb-3 sm:pb-4">
+              <div className="text-lg sm:text-2xl font-semibold text-white mt-1">{k.value}</div>
+              <div className="mt-2 sm:mt-3 h-10 sm:h-12">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={makeSeries(k.value)}>
                     <defs>
