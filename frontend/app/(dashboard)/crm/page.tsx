@@ -271,65 +271,63 @@ export default function CRMPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-[#0b1020] dark:via-[#0a0f1c] dark:to-[#070b16]">
       {/* Header Section */}
       <div className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 dark:bg-[#0b101a]/70 border-b border-slate-200 dark:border-slate-800/60">
-        <div className="px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-500/40 dark:to-purple-600/40 border border-blue-200/50 dark:border-white/10 shadow-lg shadow-blue-500/10 flex items-center justify-center">
-                <Users className="h-7 w-7 text-blue-600 dark:text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">CRM</h1>
-                <p className="text-slate-600 dark:text-slate-400">Schneller Aufbau Ihrer Datenbasis</p>
-              </div>
+        <div className="px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-500/40 dark:to-purple-600/40 border border-blue-200/50 dark:border-white/10 shadow-lg shadow-blue-500/10 flex items-center justify-center shrink-0">
+              <Users className="h-5 w-5 sm:h-7 sm:w-7 text-blue-600 dark:text-white" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">CRM</h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">Schneller Aufbau Ihrer Datenbasis</p>
             </div>
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border-blue-200/50 dark:border-blue-800/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 group">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Pipeline</p>
-                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">CHF {(totalPipeline / 1000).toFixed(0)}K</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-sm font-medium text-blue-600 dark:text-blue-400">Total Pipeline</p>
+                    <p className="text-lg sm:text-2xl font-bold text-blue-900 dark:text-blue-100">CHF {(totalPipeline / 1000).toFixed(0)}K</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                  <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform shrink-0" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border-green-200/50 dark:border-green-800/30 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 group">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-green-600 dark:text-green-400">Active Deals</p>
-                    <p className="text-2xl font-bold text-green-900 dark:text-green-100">{activeDeals}</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-sm font-medium text-green-600 dark:text-green-400">Active Deals</p>
+                    <p className="text-lg sm:text-2xl font-bold text-green-900 dark:text-green-100">{activeDeals}</p>
                   </div>
-                  <Target className="h-8 w-8 text-green-500 dark:text-green-400 group-hover:scale-110 transition-transform" />
+                  <Target className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 dark:text-green-400 group-hover:scale-110 transition-transform shrink-0" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border-purple-200/50 dark:border-purple-800/30 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 group">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Won Deals</p>
-                    <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{wonDeals}</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-sm font-medium text-purple-600 dark:text-purple-400">Won Deals</p>
+                    <p className="text-lg sm:text-2xl font-bold text-purple-900 dark:text-purple-100">{wonDeals}</p>
                   </div>
-                  <UserCheck className="h-8 w-8 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+                  <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform shrink-0" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border-orange-200/50 dark:border-orange-800/30 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 group">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Conversion Rate</p>
-                    <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">{conversionRate}%</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-sm font-medium text-orange-600 dark:text-orange-400">Conversion Rate</p>
+                    <p className="text-lg sm:text-2xl font-bold text-orange-900 dark:text-orange-100">{conversionRate}%</p>
                   </div>
-                  <Percent className="h-8 w-8 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform" />
+                  <Percent className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
                 </div>
               </CardContent>
             </Card>
@@ -338,45 +336,52 @@ export default function CRMPage() {
       </div>
 
       {/* Content */}
-      <div className="p-6 space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Tabs Navigation */}
-          <TabsList className="glass-card border rounded-xl p-1 flex flex-wrap gap-2">
-            <TabsTrigger 
-              value="companies" 
-              className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-slate-800/80 data-[state=active]:shadow-sm rounded-lg px-4 py-2"
-            >
-              <Building2 className="h-4 w-4 mr-2" />
-              Companies ({companies.length})
-            </TabsTrigger>
-            <TabsTrigger 
-              value="contacts" 
-              className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-slate-800/80 data-[state=active]:shadow-sm rounded-lg px-4 py-2"
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Contacts ({contacts.length})
-            </TabsTrigger>
-            <TabsTrigger 
-              value="deals" 
-              className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-slate-800/80 data-[state=active]:shadow-sm rounded-lg px-4 py-2"
-            >
-              <Target className="h-4 w-4 mr-2" />
-              Deals ({deals.length})
-            </TabsTrigger>
-          </TabsList>
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 pb-24 md:pb-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          {/* Tabs Navigation - scrollable on mobile */}
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <TabsList className="glass-card border rounded-xl p-1 inline-flex gap-1 sm:gap-2 min-w-max">
+              <TabsTrigger 
+                value="companies" 
+                className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-slate-800/80 data-[state=active]:shadow-sm rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
+              >
+                <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Companies</span>
+                <span className="xs:hidden">Firmen</span>
+                <span className="ml-1">({companies.length})</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="contacts" 
+                className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-slate-800/80 data-[state=active]:shadow-sm rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
+              >
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Contacts</span>
+                <span className="xs:hidden">Kontakte</span>
+                <span className="ml-1">({contacts.length})</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="deals" 
+                className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-slate-800/80 data-[state=active]:shadow-sm rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
+              >
+                <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                Deals
+                <span className="ml-1">({deals.length})</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* COMPANIES TAB */}
-          <TabsContent value="companies" className="space-y-6">
+          <TabsContent value="companies" className="space-y-4 sm:space-y-6">
             {/* Add Company Form */}
             <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
-                  <Plus className="h-5 w-5 text-blue-500" />
-                  + Neues Unternehmen hinzufügen
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2 text-sm sm:text-base">
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                  + Neues Unternehmen
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Company Name *</label>
                     <div className="relative">
@@ -477,39 +482,42 @@ export default function CRMPage() {
             </Card>
 
             {/* Search & Filter Bar */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
+            <div className="flex flex-col gap-3">
+              <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="🔍 Unternehmen, Kontakt oder Deal suchen…" 
+                  placeholder="🔍 Suchen…" 
                   value={searchQuery} 
                   onChange={(e) => setSearchQuery(e.target.value)} 
-                  className="pl-10 glass-card bg-white/60 dark:bg-slate-900/50 border-white/20 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-500" 
+                  className="pl-10 h-10 glass-card bg-white/60 dark:bg-slate-900/50 border-white/20 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-500 text-sm" 
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button 
                   variant="outline" 
+                  size="sm"
                   onClick={() => addFilter('Status')}
-                  className="glass-card"
+                  className="glass-card h-8 text-xs sm:text-sm"
                 >
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-3.5 w-3.5 mr-1.5" />
                   Status
                 </Button>
                 <Button 
                   variant="outline" 
+                  size="sm"
                   onClick={() => addFilter('Branche')}
-                  className="glass-card"
+                  className="glass-card h-8 text-xs sm:text-sm"
                 >
-                  <Briefcase className="h-4 w-4 mr-2" />
+                  <Briefcase className="h-3.5 w-3.5 mr-1.5" />
                   Branche
                 </Button>
                 <Button 
                   variant="outline" 
+                  size="sm"
                   onClick={() => addFilter('Owner')}
-                  className="glass-card"
+                  className="glass-card h-8 text-xs sm:text-sm"
                 >
-                  <UserCheck className="h-4 w-4 mr-2" />
+                  <UserCheck className="h-3.5 w-3.5 mr-1.5" />
                   Owner
                 </Button>
               </div>
