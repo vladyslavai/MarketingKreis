@@ -94,54 +94,6 @@ export default function BudgetPage() {
 
   return (
     <div className="p-8 space-y-8">
-      {/* Scenario controls */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-white">Budget Scenario</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-xs text-slate-300">Budget change (%)</label>
-              <div className="flex items-center gap-3">
-                <input type="range" min={-50} max={100} value={pct} onChange={e => setPct(Number(e.target.value))} className="w-full" />
-                <Input value={pct} onChange={e => setPct(Number(e.target.value || 0))} className="w-20" />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-slate-300">Elasticity (revenue)</label>
-              <div className="flex items-center gap-3">
-                <input type="range" min={0} max={1.5} step={0.05} value={elasticity} onChange={e => setElasticity(Number(e.target.value))} className="w-full" />
-                <Input value={elasticity} onChange={e => setElasticity(Number(e.target.value || 0))} className="w-20" />
-              </div>
-            </div>
-            <div className="flex items-end">
-              <Button className="glass-card" onClick={() => runScenario(pct, elasticity)}>Recalculate</Button>
-            </div>
-          </div>
-          {scenario?.error && <div className="text-amber-300 text-sm">{String(scenario.error)}</div>}
-          {scenario && !scenario.error && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-white">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                <div className="text-xs text-slate-300">Total Budget</div>
-                <div className="text-2xl font-semibold">{chf(scenario.scenario.budgetTotal || 0)}</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                <div className="text-xs text-slate-300">Forecast Revenue</div>
-                <div className="text-2xl font-semibold">{chf(scenario.scenario.revenue || 0)}</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                <div className="text-xs text-slate-300">Conversion</div>
-                <div className="text-2xl font-semibold">{(scenario.scenario.conversion || 0).toFixed(1)}%</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                <div className="text-xs text-slate-300">Deals</div>
-                <div className="text-2xl font-semibold">{Math.round(scenario.scenario.deals || 0)}</div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-6 sm:p-8">
         <div className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-gradient-to-tr from-fuchsia-500/30 to-blue-500/30 blur-3xl animate-gradient-shift" />
@@ -162,6 +114,138 @@ export default function BudgetPage() {
           </div>
         </div>
       </div>
+
+      {/* Budget Scenario – premium controls */}
+      <Card className="glass-card overflow-hidden border border-white/15 bg-slate-950/80">
+        <CardHeader className="border-b border-white/10 pb-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-white text-lg sm:text-xl flex items-center gap-2">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/20 border border-blue-400/40">
+                  %
+                </span>
+                Budget Scenario
+              </CardTitle>
+              <p className="text-xs text-slate-400 max-w-xl">
+                Spiele mit Budget & Elastizität und sieh in Echtzeit, wie sich Umsatz, Conversion und Deals verändern.
+              </p>
+            </div>
+            {scenario && !scenario.error && (
+              <div className="grid grid-cols-2 gap-3 text-xs sm:text-[11px] text-slate-300">
+                <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="uppercase tracking-[0.14em] text-[10px] text-emerald-300/80">Revenue Impact</span>
+                    <span className="text-emerald-200 font-semibold">
+                      {scenario.scenario.revenue >= (budgetData?.kpiTargets?.find((k:any)=>k.id==="revenue")?.current || 0)
+                        ? "+↑"
+                        : "↓"}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-sm font-semibold">
+                    {chf(scenario.scenario.revenue || 0)}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-blue-400/40 bg-blue-500/10 px-3 py-2">
+                  <div className="uppercase tracking-[0.14em] text-[10px] text-blue-200/80">Conversion</div>
+                  <div className="mt-1 text-sm font-semibold text-white">
+                    {(scenario.scenario.conversion || 0).toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5 pt-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-300">
+                <span>Budget change (%)</span>
+                <span className="rounded-full bg-slate-900/70 px-2 py-0.5 text-[11px] text-slate-100 border border-slate-700/70">
+                  {pct > 0 ? "+" : ""}{pct}%
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min={-50}
+                  max={100}
+                  value={pct}
+                  onChange={e => setPct(Number(e.target.value))}
+                  className="w-full accent-blue-500"
+                />
+                <Input
+                  value={pct}
+                  onChange={e => setPct(Number(e.target.value || 0))}
+                  className="w-20 h-9 bg-slate-900/70 border-slate-700 text-slate-100"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-300">
+                <span>Elasticity (revenue)</span>
+                <span className="rounded-full bg-slate-900/70 px-2 py-0.5 text-[11px] text-slate-100 border border-slate-700/70">
+                  {elasticity.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min={0}
+                  max={1.5}
+                  step={0.05}
+                  value={elasticity}
+                  onChange={e => setElasticity(Number(e.target.value))}
+                  className="w-full accent-emerald-500"
+                />
+                <Input
+                  value={elasticity}
+                  onChange={e => setElasticity(Number(e.target.value || 0))}
+                  className="w-20 h-9 bg-slate-900/70 border-slate-700 text-slate-100"
+                />
+              </div>
+            </div>
+            <div className="flex items-end">
+              <Button
+                className="button-glow w-full h-10 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400"
+                onClick={() => runScenario(pct, elasticity)}
+              >
+                Recalculate
+              </Button>
+            </div>
+          </div>
+
+          {scenario?.error && (
+            <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
+              {String(scenario.error)}
+            </div>
+          )}
+
+          {scenario && !scenario.error && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-white">
+              <div className="rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/90 to-slate-800/80 p-4">
+                <div className="text-[11px] text-slate-400 uppercase tracking-[0.16em]">Total Budget</div>
+                <div className="mt-1 text-2xl font-semibold">{chf(scenario.scenario.budgetTotal || 0)}</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-gradient-to-br from-blue-600/20 to-blue-500/5 p-4">
+                <div className="text-[11px] text-slate-300 uppercase tracking-[0.16em]">Forecast Revenue</div>
+                <div className="mt-1 text-2xl font-semibold">{chf(scenario.scenario.revenue || 0)}</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-gradient-to-br from-emerald-500/20 to-emerald-400/5 p-4">
+                <div className="text-[11px] text-slate-300 uppercase tracking-[0.16em]">Conversion</div>
+                <div className="mt-1 text-2xl font-semibold">
+                  {(scenario.scenario.conversion || 0).toFixed(1)}%
+                </div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-gradient-to-br from-violet-500/20 to-violet-400/5 p-4">
+                <div className="text-[11px] text-slate-300 uppercase tracking-[0.16em]">Deals</div>
+                <div className="mt-1 text-2xl font-semibold">
+                  {Math.round(scenario.scenario.deals || 0)}
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -274,5 +358,6 @@ export default function BudgetPage() {
     </div>
   )
 }
+
 
 
