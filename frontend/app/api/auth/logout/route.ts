@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 // Proxy for logout – clears backend auth cookies through the same origin.
 export async function POST(req: NextRequest) {
   try {

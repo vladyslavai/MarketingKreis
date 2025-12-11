@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 // Proxy for fetching the current authenticated user profile from the backend.
 export async function GET(req: NextRequest) {
   try {
