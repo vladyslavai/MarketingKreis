@@ -4,6 +4,7 @@ import { Sun, Moon, MonitorCog, Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { useModal } from "@/components/ui/modal/ModalProvider"
+import { AccountPanel } from "@/components/account/AccountPanel"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -13,7 +14,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   type Mode = "auto" | "light" | "dark"
   const [mode, setMode] = useState<Mode>("auto")
   const [mounted, setMounted] = useState(false)
-  const { openModal } = useModal()
+  const { openModal, closeModal } = useModal()
 
   useEffect(() => {
     setMounted(true)
@@ -105,21 +106,15 @@ export function Header({ onMenuClick }: HeaderProps) {
             </Button>
           )}
 
-          {/* User Avatar */}
+          {/* User Avatar / Account */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => {
               openModal({
-                type: "confirm",
-                title: "Ausloggen?",
-                description: "Sind Sie sicher, dass Sie sich ausloggen möchten?",
-                variant: "warning",
-                confirmText: "Ausloggen",
-                cancelText: "Abbrechen",
-                onConfirm: () => {
-                  window.location.href = '/signup?mode=login'
-                }
+                type: "custom",
+                title: "Mein Konto",
+                content: <AccountPanel onClose={closeModal} />,
               })
             }}
             className="h-9 w-9 rounded-full bg-gradient-to-br from-kaboom-red to-red-600 flex items-center justify-center text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-shadow"
