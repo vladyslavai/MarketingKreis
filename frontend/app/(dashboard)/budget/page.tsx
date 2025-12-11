@@ -117,7 +117,7 @@ export default function BudgetPage() {
 
       {/* Budget Scenario – premium controls */}
       <Card className="glass-card overflow-hidden border border-white/15 bg-slate-950/80">
-        <CardHeader className="border-b border-white/10 pb-5">
+        <CardHeader className="border-b border-white/10 px-5 sm:px-6 pt-4 pb-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <CardTitle className="text-white text-lg sm:text-xl flex items-center gap-2">
@@ -155,7 +155,7 @@ export default function BudgetPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-5 pt-5">
+        <CardContent className="space-y-5 px-5 sm:px-6 pt-5 pb-5 sm:pb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-slate-300">

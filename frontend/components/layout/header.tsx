@@ -4,7 +4,7 @@ import { Sun, Moon, MonitorCog, Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { useModal } from "@/components/ui/modal/ModalProvider"
-import { AccountPanel } from "@/components/account/AccountPanel"
+import { AccountDrawer } from "@/components/account/AccountDrawer"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -14,7 +14,8 @@ export function Header({ onMenuClick }: HeaderProps) {
   type Mode = "auto" | "light" | "dark"
   const [mode, setMode] = useState<Mode>("auto")
   const [mounted, setMounted] = useState(false)
-  const { openModal, closeModal } = useModal()
+  const [accountDrawerOpen, setAccountDrawerOpen] = useState(false)
+  const { openModal } = useModal()
 
   useEffect(() => {
     setMounted(true)
@@ -110,19 +111,19 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => {
-              openModal({
-                type: "custom",
-                title: "Mein Konto",
-                content: <AccountPanel onClose={closeModal} />,
-              })
-            }}
+            onClick={() => setAccountDrawerOpen(true)}
             className="h-9 w-9 rounded-full bg-gradient-to-br from-kaboom-red to-red-600 flex items-center justify-center text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-shadow"
           >
             A
           </Button>
         </div>
       </div>
+
+      {/* Account Drawer */}
+      <AccountDrawer 
+        isOpen={accountDrawerOpen} 
+        onClose={() => setAccountDrawerOpen(false)} 
+      />
     </header>
   )
 }
