@@ -414,8 +414,8 @@ export default function AdminPage() {
 
   if (authLoading || !user || user.role !== "admin") {
     return (
-      <div className="p-10 md:p-12">
-        <div className="glass-card rounded-2xl border border-white/10 bg-white/5 px-6 py-10 text-center text-sm text-slate-400">
+      <div className="p-4 sm:p-10 md:p-12">
+        <div className="glass-card rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-4 sm:px-6 py-8 sm:py-10 text-center text-xs sm:text-sm text-slate-400">
           {authLoading ? "Lade Admin‑Bereich…" : "Kein Zugriff – du wirst weitergeleitet…"}
         </div>
       </div>
@@ -423,121 +423,123 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="p-10 md:p-12 space-y-16">
+    <div className="p-4 sm:p-10 md:p-12 pb-24 md:pb-12 space-y-6 sm:space-y-16">
       {/* Hero header with animated blobs */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-8 md:p-10">
-        <div className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-gradient-to-tr from-fuchsia-500/30 to-blue-500/30 blur-3xl animate-gradient-shift" />
-        <div className="pointer-events-none absolute -bottom-20 -left-16 h-64 w-64 rounded-full bg-gradient-to-tr from-cyan-500/30 to-emerald-500/30 blur-3xl animate-gradient-shift" />
-        <div className="flex items-start justify-between gap-10">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/20 shadow-lg">
-              <Shield className="h-7 w-7 text-white" />
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-4 sm:p-8 md:p-10">
+        <div className="pointer-events-none absolute -top-24 -right-16 h-48 sm:h-72 w-48 sm:w-72 rounded-full bg-gradient-to-tr from-fuchsia-500/30 to-blue-500/30 blur-3xl animate-gradient-shift" />
+        <div className="pointer-events-none absolute -bottom-20 -left-16 h-40 sm:h-64 w-40 sm:w-64 rounded-full bg-gradient-to-tr from-cyan-500/30 to-emerald-500/30 blur-3xl animate-gradient-shift" />
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-10">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/20 shadow-lg flex-shrink-0">
+              <Shield className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white/90">Admin</h1>
-              <p className="text-slate-200/80 mt-1">Systemeinstellungen, Datenpflege und Hintergrundjobs</p>
+              <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-white/90">Admin</h1>
+              <p className="text-slate-200/80 mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base">Systemeinstellungen, Datenpflege und Hintergrundjobs</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="glass-card" onClick={checkHealth}>
-              <RefreshCw className="h-4 w-4 mr-2" /> Health
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <Button variant="outline" size="sm" className="glass-card h-8 text-xs sm:text-sm" onClick={checkHealth}>
+              <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> <span className="hidden xs:inline">Health</span>
             </Button>
-            <Button variant="outline" size="sm" className="glass-card" onClick={copyDiagnostics}>
-              <Info className="h-4 w-4 mr-2" /> Diagnostics
+            <Button variant="outline" size="sm" className="glass-card h-8 text-xs sm:text-sm" onClick={copyDiagnostics}>
+              <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> <span className="hidden xs:inline">Diagnostics</span>
             </Button>
           </div>
         </div>
         {/* quick stats bar */}
-        <div className="mt-8 flex flex-wrap gap-5 items-center justify-between rounded-lg bg-white/5 border border-white/10 px-8 py-6 text-sm text-slate-100 relative overflow-hidden">
+        <div className="mt-4 sm:mt-8 grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-5 sm:items-center sm:justify-between rounded-lg bg-white/5 border border-white/10 px-3 sm:px-8 py-3 sm:py-6 text-[10px] sm:text-sm text-slate-100 relative overflow-hidden">
           <div className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/2 animate-shine" />
-          <span className="flex items-center gap-2"><Server className="h-4 w-4" /> API: {apiBase}</span>
-          <span className="flex items-center gap-2"><Database className="h-4 w-4" /> Kategorien: {categoriesCount}</span>
-          <span className="flex items-center gap-2"><Wrench className="h-4 w-4" /> Jobs: {jobsSummary.total}</span>
-          <span className="flex items-center gap-2"><Flag className="h-4 w-4" /> Flags: {Object.keys(flags).filter(k=>flags[k]).length}</span>
+          <span className="flex items-center gap-1.5 sm:gap-2 truncate"><Server className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> <span className="truncate">API: {apiBase.replace('https://', '')}</span></span>
+          <span className="flex items-center gap-1.5 sm:gap-2"><Database className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> Kategorien: {categoriesCount}</span>
+          <span className="flex items-center gap-1.5 sm:gap-2"><Wrench className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> Jobs: {jobsSummary.total}</span>
+          <span className="flex items-center gap-1.5 sm:gap-2"><Flag className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> Flags: {Object.keys(flags).filter(k=>flags[k]).length}</span>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-12">
-        <TabsList className="mt-2">
-          <TabsTrigger value="overview">Übersicht</TabsTrigger>
-          <TabsTrigger value="jobs">Jobs</TabsTrigger>
-          <TabsTrigger value="data">Daten</TabsTrigger>
-          <TabsTrigger value="users">Benutzer</TabsTrigger>
-          <TabsTrigger value="flags">Flags</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 sm:space-y-12">
+        <TabsList className="mt-2 w-full overflow-x-auto flex-nowrap justify-start sm:justify-center">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-4">Übersicht</TabsTrigger>
+          <TabsTrigger value="jobs" className="text-xs sm:text-sm px-2 sm:px-4">Jobs</TabsTrigger>
+          <TabsTrigger value="data" className="text-xs sm:text-sm px-2 sm:px-4">Daten</TabsTrigger>
+          <TabsTrigger value="users" className="text-xs sm:text-sm px-2 sm:px-4">Benutzer</TabsTrigger>
+          <TabsTrigger value="flags" className="text-xs sm:text-sm px-2 sm:px-4">Flags</TabsTrigger>
+          <TabsTrigger value="system" className="text-xs sm:text-sm px-2 sm:px-4">System</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-10">
+        <TabsContent value="overview" className="space-y-4 sm:space-y-10">
           {/* Quick actions */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-6">
             {[
-              {label: 'Refresh', onClick: refreshJobs, icon: <RefreshCw className="h-4 w-4" />},
-              {label: 'Health', onClick: checkHealth, icon: <Server className="h-4 w-4" />},
-              {label: 'Diagnostics', onClick: copyDiagnostics, icon: <Info className="h-4 w-4" />},
-              {label: 'Add Category', onClick: () => { if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } addCategory() }, icon: <Settings className="h-4 w-4" />},
+              {label: 'Refresh', onClick: refreshJobs, icon: <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />},
+              {label: 'Health', onClick: checkHealth, icon: <Server className="h-3.5 w-3.5 sm:h-4 sm:w-4" />},
+              {label: 'Diagnostics', onClick: copyDiagnostics, icon: <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />},
+              {label: 'Add Category', onClick: () => { if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } addCategory() }, icon: <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />},
             ].map((a, i)=>(
-              <button key={i} onClick={a.onClick as any} className="button-glow group rounded-xl border border-white/20 bg-white/60 dark:bg-neutral-900/40 px-5 py-3.5 text-sm font-medium flex items-center justify-center gap-3 hover:ring-1 hover:ring-white/30 transition disabled:opacity-60" disabled={i===3 && !!flags.readOnlyMode} title={i===3 && flags.readOnlyMode ? "Read‑Only aktiv" : undefined}>
-                {a.icon} <span>{a.label}</span>
+              <button key={i} onClick={a.onClick as any} className="button-glow group rounded-lg sm:rounded-xl border border-white/20 bg-white/60 dark:bg-neutral-900/40 px-2 sm:px-5 py-2.5 sm:py-3.5 text-[10px] sm:text-sm font-medium flex items-center justify-center gap-1.5 sm:gap-3 hover:ring-1 hover:ring-white/30 transition disabled:opacity-60" disabled={i===3 && !!flags.readOnlyMode} title={i===3 && flags.readOnlyMode ? "Read‑Only aktiv" : undefined}>
+                {a.icon} <span className="truncate">{a.label}</span>
               </button>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-8">
             <Card className="glass-card">
-              <CardHeader className="p-6 pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Server className="h-4 w-4" /> Backend
+              <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <Server className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Backend
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 pt-0 space-y-4">
-                <div className="text-sm">
+              <CardContent className="p-3 sm:p-6 pt-0 space-y-2 sm:space-y-4">
+                <div className="text-xs sm:text-sm">
                   <span className="text-slate-500">API Base:</span>{" "}
-                  <span className="font-medium">{apiBase}</span>
+                  <span className="font-medium truncate block sm:inline">{apiBase.replace('https://', '')}</span>
                 </div>
-                <div className="text-sm">
+                <div className="text-xs sm:text-sm">
                   <span className="text-slate-500">Health:</span>{" "}
                   <span className="font-medium">{health?.status || "—"}</span>
                 </div>
-                <Button size="sm" variant="outline" onClick={checkHealth} disabled={checking}>
-                  <RefreshCw className="h-4 w-4 mr-2" /> Health prüfen
+                <Button size="sm" variant="outline" onClick={checkHealth} disabled={checking} className="text-xs sm:text-sm h-7 sm:h-8">
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Health prüfen
                 </Button>
               </CardContent>
             </Card>
 
             <Card className="glass-card">
-              <CardHeader className="p-6 pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" /> Kategorien
+              <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Kategorien
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 pt-0">
-                <div className="text-sm text-slate-500">User‑Kategorien</div>
-                <div className="text-3xl font-bold mt-1">{categoriesCount}</div>
+              <CardContent className="p-3 sm:p-6 pt-0">
+                <div className="text-xs sm:text-sm text-slate-500">User‑Kategorien</div>
+                <div className="text-2xl sm:text-3xl font-bold mt-1">{categoriesCount}</div>
               </CardContent>
             </Card>
 
             <Card className="glass-card">
-              <CardHeader className="p-6 pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <PlayCircle className="h-4 w-4" /> Jobs
+              <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <PlayCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Jobs
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 pt-0 space-y-3">
-                <div className="text-sm">
-                  <span className="text-slate-500">Gesamt:</span>{" "}
-                  <span className="font-medium">{jobsSummary.total}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-slate-500">Aktiv:</span>{" "}
-                  <span className="font-medium">{jobsSummary.processing}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-slate-500">Fertig:</span>{" "}
-                  <span className="font-medium">{jobsSummary.completed}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-slate-500">Fehler:</span>{" "}
-                  <span className="font-medium">{jobsSummary.failed}</span>
+              <CardContent className="p-3 sm:p-6 pt-0 space-y-2 sm:space-y-3">
+                <div className="grid grid-cols-2 gap-2 sm:block sm:space-y-3">
+                  <div className="text-xs sm:text-sm">
+                    <span className="text-slate-500">Gesamt:</span>{" "}
+                    <span className="font-medium">{jobsSummary.total}</span>
+                  </div>
+                  <div className="text-xs sm:text-sm">
+                    <span className="text-slate-500">Aktiv:</span>{" "}
+                    <span className="font-medium">{jobsSummary.processing}</span>
+                  </div>
+                  <div className="text-xs sm:text-sm">
+                    <span className="text-slate-500">Fertig:</span>{" "}
+                    <span className="font-medium">{jobsSummary.completed}</span>
+                  </div>
+                  <div className="text-xs sm:text-sm">
+                    <span className="text-slate-500">Fehler:</span>{" "}
+                    <span className="font-medium">{jobsSummary.failed}</span>
+                  </div>
                 </div>
                 {/* Completion meter */}
                 <div className="mt-2">
@@ -545,19 +547,19 @@ export default function AdminPage() {
                     const done = jobsSummary.completed
                     const rate = jobsSummary.total ? Math.round((done / jobsSummary.total) * 100) : 0
                     return (
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-10 w-10 rounded-full" style={{ background: `conic-gradient(#22c55e ${rate * 3.6}deg, rgba(148,163,184,.3) 0deg)` }}>
-                          <div className="absolute inset-1 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center text-xs font-semibold">{rate}%</div>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full flex-shrink-0" style={{ background: `conic-gradient(#22c55e ${rate * 3.6}deg, rgba(148,163,184,.3) 0deg)` }}>
+                          <div className="absolute inset-0.5 sm:inset-1 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center text-[10px] sm:text-xs font-semibold">{rate}%</div>
                         </div>
-                        <div className="flex-1 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                        <div className="flex-1 h-1.5 sm:h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                           <div className="h-full bg-gradient-to-r from-emerald-500 to-green-500" style={{ width: `${rate}%` }} />
                         </div>
                       </div>
                     )
                   })()}
                 </div>
-                <Button size="sm" variant="outline" onClick={refreshJobs}>
-                  <RefreshCw className="h-4 w-4 mr-2" /> Aktualisieren
+                <Button size="sm" variant="outline" onClick={refreshJobs} className="text-xs sm:text-sm h-7 sm:h-8">
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Aktualisieren
                 </Button>
               </CardContent>
             </Card>
@@ -566,82 +568,82 @@ export default function AdminPage() {
           {/* CRM stats row */}
           <div className="space-y-2">
             {!!flags.experimentalCharts && (
-              <div className="flex items-center justify-end gap-2 text-xs">
+              <div className="flex items-center justify-end gap-2 text-[10px] sm:text-xs">
                 <span className="text-slate-400">Chart:</span>
-                <button onClick={()=>setChartMode('bars')} className={`px-2 py-1 rounded-md border ${chartMode==='bars' ? 'bg-white/10 border-white/20 text-slate-200' : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>Bars</button>
-                <button onClick={()=>setChartMode('area')} className={`px-2 py-1 rounded-md border ${chartMode==='area' ? 'bg-white/10 border-white/20 text-slate-200' : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>Area</button>
+                <button onClick={()=>setChartMode('bars')} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md border ${chartMode==='bars' ? 'bg-white/10 border-white/20 text-slate-200' : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>Bars</button>
+                <button onClick={()=>setChartMode('area')} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md border ${chartMode==='area' ? 'bg-white/10 border-white/20 text-slate-200' : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>Area</button>
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-8">
             <Card className="glass-card">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-sm text-slate-500">Unternehmen</div>
-                  <div className="text-3xl font-bold">{typeof stats?.companies === 'number' ? stats?.companies : "—"}</div>
+              <CardContent className="p-3 sm:p-6 flex items-center justify-between gap-2">
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <div className="text-[10px] sm:text-sm text-slate-500 truncate">Unternehmen</div>
+                  <div className="text-lg sm:text-3xl font-bold">{typeof stats?.companies === 'number' ? stats?.companies : "—"}</div>
                   {!!flags.experimentalCharts && (series.companies.length > 0) && (
                     chartMode === 'bars'
                       ? <MicroBars data={series.companies} dates={seriesDates} stroke="rgb(59,130,246)" from="#93c5fd" to="#1e3a8a" />
                       : <MicroArea data={series.companies} dates={seriesDates} stroke="rgb(59,130,246)" from="#93c5fd" to="#1e3a8a" />
                   )}
                 </div>
-                <Briefcase className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <Briefcase className="h-5 w-5 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               </CardContent>
             </Card>
             <Card className="glass-card">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-sm text-slate-500">Kontakte</div>
-                  <div className="text-3xl font-bold">{typeof stats?.contacts === 'number' ? stats?.contacts : "—"}</div>
+              <CardContent className="p-3 sm:p-6 flex items-center justify-between gap-2">
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <div className="text-[10px] sm:text-sm text-slate-500 truncate">Kontakte</div>
+                  <div className="text-lg sm:text-3xl font-bold">{typeof stats?.contacts === 'number' ? stats?.contacts : "—"}</div>
                   {!!flags.experimentalCharts && (series.contacts.length > 0) && (
                     chartMode === 'bars'
                       ? <MicroBars data={series.contacts} dates={seriesDates} stroke="rgb(34,197,94)" from="#86efac" to="#065f46" />
                       : <MicroArea data={series.contacts} dates={seriesDates} stroke="rgb(34,197,94)" from="#86efac" to="#065f46" />
                   )}
                 </div>
-                <Users className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <Users className="h-5 w-5 sm:h-8 sm:w-8 text-green-600 dark:text-green-400 flex-shrink-0" />
               </CardContent>
             </Card>
             <Card className="glass-card">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-sm text-slate-500">Deals</div>
-                  <div className="text-3xl font-bold">{typeof stats?.deals === 'number' ? stats?.deals : "—"}</div>
+              <CardContent className="p-3 sm:p-6 flex items-center justify-between gap-2">
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <div className="text-[10px] sm:text-sm text-slate-500 truncate">Deals</div>
+                  <div className="text-lg sm:text-3xl font-bold">{typeof stats?.deals === 'number' ? stats?.deals : "—"}</div>
                   {!!flags.experimentalCharts && (series.deals.length > 0) && (
                     chartMode === 'bars'
                       ? <MicroBars data={series.deals} dates={seriesDates} stroke="rgb(168,85,247)" from="#d8b4fe" to="#581c87" />
                       : <MicroArea data={series.deals} dates={seriesDates} stroke="rgb(168,85,247)" from="#d8b4fe" to="#581c87" />
                   )}
                 </div>
-                <Contact2 className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                <Contact2 className="h-5 w-5 sm:h-8 sm:w-8 text-purple-600 dark:text-purple-400 flex-shrink-0" />
               </CardContent>
             </Card>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="jobs" className="space-y-8">
+        <TabsContent value="jobs" className="space-y-4 sm:space-y-8">
           <Card className="glass-card">
-            <CardHeader className="p-6 pb-4 flex flex-row flex-wrap items-start justify-between gap-3">
-              <CardTitle>Hintergrund‑Jobs</CardTitle>
-              <Button size="sm" variant="outline" onClick={refreshJobs}>
-                <RefreshCw className="h-4 w-4 mr-2" /> Refresh
+            <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4 flex flex-row flex-wrap items-start justify-between gap-2 sm:gap-3">
+              <CardTitle className="text-sm sm:text-base">Hintergrund‑Jobs</CardTitle>
+              <Button size="sm" variant="outline" onClick={refreshJobs} className="h-7 sm:h-8 text-xs sm:text-sm">
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Refresh
               </Button>
             </CardHeader>
-            <CardContent className="p-6 pt-0">
+            <CardContent className="p-3 sm:p-6 pt-0">
               {jobsLoading ? (
-                <div className="py-8 text-slate-500">Lade Jobs…</div>
+                <div className="py-6 sm:py-8 text-xs sm:text-sm text-slate-500">Lade Jobs…</div>
               ) : jobs.length === 0 ? (
-                <div className="py-8 text-slate-500">Keine Jobs</div>
+                <div className="py-6 sm:py-8 text-xs sm:text-sm text-slate-500">Keine Jobs</div>
               ) : (
-                <div className="overflow-x-auto rounded-2xl border border-white/10">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto rounded-xl sm:rounded-2xl border border-white/10 -mx-1 sm:mx-0">
+                  <table className="w-full text-xs sm:text-sm min-w-[500px]">
                     <thead className="bg-white/5">
-                      <tr className="text-left text-slate-400 uppercase text-xs tracking-wider">
-                        <th className="py-4 px-5 font-medium">ID</th>
-                        <th className="py-4 px-5 font-medium">Typ</th>
-                        <th className="py-4 px-5 font-medium">Status</th>
-                        <th className="py-4 px-5 font-medium">Fortschritt</th>
-                        <th className="py-4 px-5 font-medium">Erstellt</th>
+                      <tr className="text-left text-slate-400 uppercase text-[10px] sm:text-xs tracking-wider">
+                        <th className="py-2 sm:py-4 px-2 sm:px-5 font-medium">ID</th>
+                        <th className="py-2 sm:py-4 px-2 sm:px-5 font-medium">Typ</th>
+                        <th className="py-2 sm:py-4 px-2 sm:px-5 font-medium">Status</th>
+                        <th className="py-2 sm:py-4 px-2 sm:px-5 font-medium hidden sm:table-cell">Fortschritt</th>
+                        <th className="py-2 sm:py-4 px-2 sm:px-5 font-medium">Erstellt</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10">
@@ -654,29 +656,29 @@ export default function AdminPage() {
                           "bg-slate-500/15 text-slate-300 border-slate-500/30"
                         return (
                           <tr key={j.id} className="hover:bg-white/5 even:bg-white/5 transition-colors">
-                            <td className="py-5 px-5 font-mono text-xs text-slate-400">{j.id}</td>
-                            <td className="py-5 px-5">
-                              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                                <span className="text-slate-200">{j.type}</span>
+                            <td className="py-2 sm:py-5 px-2 sm:px-5 font-mono text-[10px] sm:text-xs text-slate-400">{j.id}</td>
+                            <td className="py-2 sm:py-5 px-2 sm:px-5">
+                              <span className="inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/10 bg-white/5 px-1.5 sm:px-3 py-0.5 sm:py-1">
+                                <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-slate-400" />
+                                <span className="text-slate-200 text-[10px] sm:text-sm truncate max-w-[60px] sm:max-w-none">{j.type}</span>
                               </span>
                             </td>
-                            <td className="py-5 px-5">
-                              <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${statusClass}`}>
-                                {status === "processing" && <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />}
+                            <td className="py-2 sm:py-5 px-2 sm:px-5">
+                              <span className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full border px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-medium capitalize ${statusClass}`}>
+                                {status === "processing" && <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-blue-400 animate-pulse" />}
                                 {j.status}
                               </span>
                             </td>
-                            <td className="py-5 px-5">
+                            <td className="py-2 sm:py-5 px-2 sm:px-5 hidden sm:table-cell">
                               {typeof j.progress === "number" && status === "processing" ? (
-                                <div className="w-48 h-2 rounded-full bg-white/10 overflow-hidden">
+                                <div className="w-24 sm:w-48 h-1.5 sm:h-2 rounded-full bg-white/10 overflow-hidden">
                                   <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500" style={{ width: `${j.progress}%` }} />
                                 </div>
                               ) : (
                                 <span className="text-slate-500">—</span>
                               )}
                             </td>
-                            <td className="py-5 px-5 text-slate-400">{new Date(j.created_at).toLocaleString("de-DE")}</td>
+                            <td className="py-2 sm:py-5 px-2 sm:px-5 text-slate-400 text-[10px] sm:text-sm whitespace-nowrap">{new Date(j.created_at).toLocaleDateString("de-DE")}</td>
                           </tr>
                         )
                       })}
@@ -689,58 +691,58 @@ export default function AdminPage() {
         </TabsContent>
 
         {/* DATA */}
-        <TabsContent value="data" className="space-y-8">
+        <TabsContent value="data" className="space-y-4 sm:space-y-8">
           <Card className="glass-card">
-            <CardHeader className="p-6 pb-4 flex flex-row flex-wrap items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-white/20 flex items-center justify-center">
-                  <Tag className="h-5 w-5 text-white" />
+            <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-white/20 flex items-center justify-center flex-shrink-0">
+                  <Tag className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <div>
-                  <CardTitle>User‑Kategorien bearbeiten</CardTitle>
-                  <div className="text-xs text-slate-400 mt-0.5">Definiere farbige Labels für Aktivitäten, Reports und Boards</div>
+                <div className="min-w-0">
+                  <CardTitle className="text-sm sm:text-base">User‑Kategorien bearbeiten</CardTitle>
+                  <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">Definiere farbige Labels für Aktivitäten</div>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="glass-card hover:ring-1 hover:ring-blue-500/30" onClick={()=>{ if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } addCategory() }} disabled={!!flags.readOnlyMode} title={flags.readOnlyMode ? "Read‑Only aktiv" : undefined}>
-                  <Plus className="h-4 w-4 mr-2" /> Hinzufügen
+              <div className="flex gap-2 self-end sm:self-auto">
+                <Button variant="outline" size="sm" className="glass-card hover:ring-1 hover:ring-blue-500/30 h-7 sm:h-8 text-[10px] sm:text-sm" onClick={()=>{ if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } addCategory() }} disabled={!!flags.readOnlyMode} title={flags.readOnlyMode ? "Read‑Only aktiv" : undefined}>
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Hinzufügen
                 </Button>
-                <Button size="sm" className="button-glow bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500" onClick={()=>{ if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } saveCategories() }} disabled={savingCats || !!flags.readOnlyMode} title={flags.readOnlyMode ? "Read‑Only aktiv" : undefined}>
+                <Button size="sm" className="button-glow bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 h-7 sm:h-8 text-[10px] sm:text-sm" onClick={()=>{ if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } saveCategories() }} disabled={savingCats || !!flags.readOnlyMode} title={flags.readOnlyMode ? "Read‑Only aktiv" : undefined}>
                   {savingCats ? "Speichern…" : "Speichern"}
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-8">
+            <CardContent className="p-3 sm:p-6 pt-0 space-y-3 sm:space-y-8">
               {categories.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 mx-auto mb-4 flex items-center justify-center">
-                    <Tag className="h-6 w-6 text-slate-400" />
+                <div className="text-center py-8 sm:py-16">
+                  <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-full bg-white/5 border border-white/10 mx-auto mb-3 sm:mb-4 flex items-center justify-center">
+                    <Tag className="h-4 w-4 sm:h-6 sm:w-6 text-slate-400" />
                   </div>
-                  <div className="text-slate-300 mb-2">Keine Kategorien</div>
-                  <div className="text-slate-400 text-sm mb-4">Füge deine ersten Kategorien hinzu und vergebe Farben</div>
-                  <Button variant="outline" size="sm" onClick={addCategory}><Plus className="h-4 w-4 mr-2" /> Hinzufügen</Button>
+                  <div className="text-slate-300 mb-1 sm:mb-2 text-sm sm:text-base">Keine Kategorien</div>
+                  <div className="text-slate-400 text-xs sm:text-sm mb-3 sm:mb-4">Füge deine ersten Kategorien hinzu</div>
+                  <Button variant="outline" size="sm" onClick={addCategory} className="h-7 sm:h-8 text-xs sm:text-sm"><Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Hinzufügen</Button>
                 </div>
               ) : (
                 categories.map((c, idx) => (
-                  <div key={idx} className="rounded-2xl border border-white/10 bg-white/5 p-7 grid grid-cols-1 md:grid-cols-12 gap-7 items-center">
-                    <div className="md:col-span-7">
-                      <Input value={c.name} placeholder="Name (z.B. Social, Email, Event)" onChange={(e)=> updateCategory(idx, "name", e.target.value)} />
+                  <div key={idx} className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-7 flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-7 sm:items-center">
+                    <div className="sm:col-span-7">
+                      <Input value={c.name} placeholder="Name (z.B. Social, Email)" onChange={(e)=> updateCategory(idx, "name", e.target.value)} className="h-8 sm:h-10 text-xs sm:text-sm" />
                     </div>
-                    <div className="md:col-span-2 flex items-center gap-3">
+                    <div className="sm:col-span-2 flex items-center gap-2 sm:gap-3">
                       <input
                         type="color"
-                        className="h-10 w-12 rounded-md border border-white/10 bg-transparent p-1"
+                        className="h-8 w-10 sm:h-10 sm:w-12 rounded-md border border-white/10 bg-transparent p-1"
                         value={c.color}
                         onChange={(e)=> updateCategory(idx, "color", e.target.value)}
                         title="Farbe wählen"
                       />
-                      <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-2 py-1">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c.color }} />
-                        <span className="text-xs text-slate-300">Beispiel</span>
+                      <span className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-white/10 px-2 py-1">
+                        <span className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                        <span className="text-[10px] sm:text-xs text-slate-300">Beispiel</span>
                       </span>
                     </div>
-                    <div className="md:col-span-3 flex justify-end">
-                      <Button variant="outline" size="sm" onClick={()=> { if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } removeCategory(idx) }} disabled={!!flags.readOnlyMode} title={flags.readOnlyMode ? "Read‑Only aktiv" : undefined}>Entfernen</Button>
+                    <div className="sm:col-span-3 flex justify-end">
+                      <Button variant="outline" size="sm" onClick={()=> { if (flags.readOnlyMode) { alert("Read‑Only aktiv – keine Änderungen möglich."); return } removeCategory(idx) }} disabled={!!flags.readOnlyMode} title={flags.readOnlyMode ? "Read‑Only aktiv" : undefined} className="h-7 sm:h-8 text-[10px] sm:text-sm">Entfernen</Button>
                     </div>
                   </div>
                 ))
@@ -750,25 +752,25 @@ export default function AdminPage() {
         </TabsContent>
 
         {/* USERS */}
-        <TabsContent value="users" className="space-y-8">
+        <TabsContent value="users" className="space-y-4 sm:space-y-8">
           <Card className="glass-card">
-            <CardHeader className="p-6 pb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/30 to-blue-500/30 border border-white/20 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-white" />
+            <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-500/30 to-blue-500/30 border border-white/20 flex items-center justify-center flex-shrink-0">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <div>
-                  <CardTitle>Benutzerverwaltung</CardTitle>
-                  <div className="text-xs text-slate-400 mt-0.5">
-                    Rollen, Verifizierung und Zugänge zentral steuern
+                <div className="min-w-0">
+                  <CardTitle className="text-sm sm:text-base">Benutzerverwaltung</CardTitle>
+                  <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">
+                    Rollen, Verifizierung und Zugänge
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <div className="flex items-center gap-2">
                   <Input
                     placeholder="Suche nach E‑Mail…"
-                    className="h-9 w-44 sm:w-56"
+                    className="h-7 sm:h-9 w-full sm:w-44 md:w-56 text-xs sm:text-sm"
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                     onKeyDown={(e) => {
@@ -780,15 +782,15 @@ export default function AdminPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="glass-card"
+                    className="glass-card h-7 sm:h-9 text-[10px] sm:text-sm"
                     onClick={() => loadUsers()}
                     disabled={usersLoading}
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" /> Laden
+                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> <span className="hidden xs:inline">Laden</span>
                   </Button>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-400">Rolle:</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs overflow-x-auto pb-1 sm:pb-0">
+                  <span className="text-slate-400 flex-shrink-0">Rolle:</span>
                   {[
                     { key: "", label: "Alle" },
                     { key: "user", label: "User" },
@@ -803,7 +805,7 @@ export default function AdminPage() {
                         setUserRoleFilter(next)
                         loadUsers({ role: next })
                       }}
-                      className={`px-3 py-1 rounded-full border text-[11px] font-medium transition ${
+                      className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border text-[10px] sm:text-[11px] font-medium transition flex-shrink-0 ${
                         userRoleFilter === r.key
                           ? "bg-white/15 border-white/30 text-slate-100"
                           : "bg-transparent border-white/15 text-slate-400 hover:bg-white/5"
@@ -815,87 +817,87 @@ export default function AdminPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-6">
+            <CardContent className="p-3 sm:p-6 pt-0 space-y-3 sm:space-y-6">
               {seedStatus && (
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 text-[10px] sm:text-xs">
+                  <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-2 sm:p-4 flex items-center justify-between">
                     <div>
-                      <div className="text-slate-400">Benutzer gesamt</div>
-                      <div className="mt-1 text-lg font-semibold text-slate-100">{seedStatus.users.total}</div>
+                      <div className="text-slate-400 truncate">Benutzer gesamt</div>
+                      <div className="mt-0.5 sm:mt-1 text-sm sm:text-lg font-semibold text-slate-100">{seedStatus.users.total}</div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                  <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-2 sm:p-4 flex items-center justify-between">
                     <div>
                       <div className="text-slate-400">Admins</div>
-                      <div className="mt-1 text-lg font-semibold text-slate-100">{seedStatus.users.admins}</div>
+                      <div className="mt-0.5 sm:mt-1 text-sm sm:text-lg font-semibold text-slate-100">{seedStatus.users.admins}</div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
+                  <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-2 sm:p-4 flex items-center justify-between">
                     <div>
-                      <div className="text-slate-400">CRM Datensätze</div>
-                      <div className="mt-1 text-lg font-semibold text-slate-100">
+                      <div className="text-slate-400 truncate">CRM Datensätze</div>
+                      <div className="mt-0.5 sm:mt-1 text-sm sm:text-lg font-semibold text-slate-100">
                         {seedStatus.crm.companies + seedStatus.crm.contacts + seedStatus.crm.deals}
                       </div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center justify-between">
-                    <div>
-                      <div className="text-slate-400">Aktivitäten / Kalender</div>
-                      <div className="mt-1 text-lg font-semibold text-slate-100">
+                  <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-2 sm:p-4 flex items-center justify-between gap-1">
+                    <div className="min-w-0">
+                      <div className="text-slate-400 truncate">Aktivität / Kalender</div>
+                      <div className="mt-0.5 sm:mt-1 text-sm sm:text-lg font-semibold text-slate-100">
                         {seedStatus.activities.activities + seedStatus.activities.calendarEntries}
                       </div>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="ml-3"
+                      className="h-6 sm:h-8 px-1.5 sm:px-2 text-[10px] sm:text-xs flex-shrink-0"
                       onClick={loadSeedStatus}
                       disabled={seedLoading}
                     >
-                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh
+                      <RefreshCw className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     </Button>
                   </div>
                 </div>
               )}
               {seedError && (
-                <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2">
+                <div className="text-[10px] sm:text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg sm:rounded-xl px-2 sm:px-3 py-1.5 sm:py-2">
                   {seedError}
                 </div>
               )}
               {usersError && (
-                <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2">
+                <div className="text-[10px] sm:text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg sm:rounded-xl px-2 sm:px-3 py-1.5 sm:py-2">
                   {usersError}
                 </div>
               )}
               {usersLoading ? (
-                <div className="py-10 text-sm text-slate-400">Lade Benutzer…</div>
+                <div className="py-6 sm:py-10 text-xs sm:text-sm text-slate-400">Lade Benutzer…</div>
               ) : adminUsers.length === 0 ? (
-                <div className="py-12 text-center text-sm text-slate-400">
+                <div className="py-8 sm:py-12 text-center text-xs sm:text-sm text-slate-400">
                   Keine Benutzer gefunden. Passe Filter oder Suche an.
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-2xl border border-white/10">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto rounded-lg sm:rounded-2xl border border-white/10 -mx-1 sm:mx-0">
+                  <table className="w-full text-xs sm:text-sm min-w-[600px]">
                     <thead className="bg-white/5">
-                      <tr className="text-left text-slate-400 uppercase text-xs tracking-wider">
-                        <th className="py-3.5 px-5 font-medium">ID</th>
-                        <th className="py-3.5 px-5 font-medium">E‑Mail</th>
-                        <th className="py-3.5 px-5 font-medium">Rolle</th>
-                        <th className="py-3.5 px-5 font-medium">Verifiziert</th>
-                        <th className="py-3.5 px-5 font-medium">Erstellt</th>
-                        <th className="py-3.5 px-5 font-medium text-right">Aktionen</th>
+                      <tr className="text-left text-slate-400 uppercase text-[10px] sm:text-xs tracking-wider">
+                        <th className="py-2 sm:py-3.5 px-2 sm:px-5 font-medium">ID</th>
+                        <th className="py-2 sm:py-3.5 px-2 sm:px-5 font-medium">E‑Mail</th>
+                        <th className="py-2 sm:py-3.5 px-2 sm:px-5 font-medium">Rolle</th>
+                        <th className="py-2 sm:py-3.5 px-2 sm:px-5 font-medium hidden sm:table-cell">Verifiziert</th>
+                        <th className="py-2 sm:py-3.5 px-2 sm:px-5 font-medium hidden sm:table-cell">Erstellt</th>
+                        <th className="py-2 sm:py-3.5 px-2 sm:px-5 font-medium text-right">Aktionen</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10">
                       {adminUsers.map((u) => (
                         <tr key={u.id} className="hover:bg-white/5 transition-colors">
-                          <td className="py-3.5 px-5 font-mono text-xs text-slate-400">{u.id}</td>
-                          <td className="py-3.5 px-5">
-                            <div className="text-sm text-slate-100 truncate max-w-xs">{u.email}</div>
+                          <td className="py-2 sm:py-3.5 px-2 sm:px-5 font-mono text-[10px] sm:text-xs text-slate-400">{u.id}</td>
+                          <td className="py-2 sm:py-3.5 px-2 sm:px-5">
+                            <div className="text-[10px] sm:text-sm text-slate-100 truncate max-w-[100px] sm:max-w-xs">{u.email}</div>
                           </td>
-                          <td className="py-3.5 px-5">
+                          <td className="py-2 sm:py-3.5 px-2 sm:px-5">
                             <select
-                              className="bg-transparent border border-white/15 rounded-md px-2 py-1 text-xs text-slate-100"
+                              className="bg-transparent border border-white/15 rounded-md px-1 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs text-slate-100"
                               value={u.role}
                               onChange={(e) =>
                                 handleChangeRole(
@@ -910,47 +912,49 @@ export default function AdminPage() {
                               <option value="admin">admin</option>
                             </select>
                           </td>
-                          <td className="py-3.5 px-5">
+                          <td className="py-2 sm:py-3.5 px-2 sm:px-5 hidden sm:table-cell">
                             <button
                               type="button"
                               onClick={() => handleToggleVerified(u)}
                               disabled={updatingUserId === u.id || deletingUserId === u.id}
-                              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+                              className={`inline-flex items-center gap-1.5 sm:gap-2 rounded-full border px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium ${
                                 u.isVerified
                                   ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/40"
                                   : "bg-slate-500/10 text-slate-200 border-slate-500/40"
                               }`}
                             >
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${
+                                className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full ${
                                   u.isVerified ? "bg-emerald-400" : "bg-slate-400"
                                 }`}
                               />
                               {u.isVerified ? "Verifiziert" : "Unbestätigt"}
                             </button>
                           </td>
-                          <td className="py-3.5 px-5 text-xs text-slate-400">
-                            {u.createdAt ? new Date(u.createdAt).toLocaleString("de-DE") : "—"}
+                          <td className="py-2 sm:py-3.5 px-2 sm:px-5 text-[10px] sm:text-xs text-slate-400 hidden sm:table-cell">
+                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString("de-DE") : "—"}
                           </td>
-                          <td className="py-3.5 px-5">
-                            <div className="flex justify-end gap-2">
+                          <td className="py-2 sm:py-3.5 px-2 sm:px-5">
+                            <div className="flex justify-end gap-1 sm:gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="text-xs"
+                                className="text-[10px] sm:text-xs h-6 sm:h-8 px-1.5 sm:px-2"
                                 onClick={() => handleResetPassword(u)}
                                 disabled={updatingUserId === u.id || deletingUserId === u.id}
                               >
-                                Passwort
+                                <span className="hidden sm:inline">Passwort</span>
+                                <span className="sm:hidden">PW</span>
                               </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="text-xs border-red-500/40 text-red-300 hover:bg-red-500/10"
+                                className="text-[10px] sm:text-xs h-6 sm:h-8 px-1.5 sm:px-2 border-red-500/40 text-red-300 hover:bg-red-500/10"
                                 onClick={() => handleDeleteUser(u)}
                                 disabled={updatingUserId === u.id || deletingUserId === u.id}
                               >
-                                Löschen
+                                <span className="hidden sm:inline">Löschen</span>
+                                <span className="sm:hidden">×</span>
                               </Button>
                             </div>
                           </td>
@@ -958,18 +962,18 @@ export default function AdminPage() {
                       ))}
                     </tbody>
                   </table>
-                  <div className="flex items-center justify-between px-5 py-3 text-xs text-slate-400">
+                  <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs text-slate-400">
                     <span>
-                      Zeigt {adminUsers.length} von {usersTotal} Benutzer(n)
+                      Zeigt {adminUsers.length} von {usersTotal}
                     </span>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="glass-card"
+                      className="glass-card h-6 sm:h-8 text-[10px] sm:text-xs"
                       onClick={() => loadUsers()}
                       disabled={usersLoading}
                     >
-                      <RefreshCw className="h-3 w-3 mr-1" /> Neu laden
+                      <RefreshCw className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" /> <span className="hidden sm:inline">Neu laden</span>
                     </Button>
                   </div>
                 </div>
@@ -979,16 +983,16 @@ export default function AdminPage() {
         </TabsContent>
 
         {/* FLAGS */}
-        <TabsContent value="flags" className="space-y-8">
+        <TabsContent value="flags" className="space-y-4 sm:space-y-8">
           <Card className="glass-card">
-            <CardHeader className="p-6 pb-4 flex flex-row flex-wrap items-start justify-between gap-4">
-              <CardTitle className="tracking-tight">Feature Flags (lokal)</CardTitle>
+            <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4 flex flex-row flex-wrap items-start justify-between gap-2 sm:gap-4">
+              <CardTitle className="tracking-tight text-sm sm:text-base">Feature Flags (lokal)</CardTitle>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400">Aktiv: {Object.keys(flags).filter(k=>flags[k]).length}</span>
-                <Button variant="outline" size="sm" onClick={resetFlags}>Reset</Button>
+                <span className="text-[10px] sm:text-xs text-slate-400">Aktiv: {Object.keys(flags).filter(k=>flags[k]).length}</span>
+                <Button variant="outline" size="sm" onClick={resetFlags} className="h-6 sm:h-8 text-[10px] sm:text-sm">Reset</Button>
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <CardContent className="p-3 sm:p-6 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-8">
               {([
                 { key: "experimentalCharts", label: "Experimentelle Charts", desc: "Neue Mini‑Charts & Interaktionen", Icon: FlaskConical },
                 { key: "compactSidebar", label: "Kompakte Sidebar", desc: "Schmalere Navigation & mehr Platz", Icon: PanelLeft },
@@ -996,37 +1000,37 @@ export default function AdminPage() {
                 { key: "aiReportDeterministic", label: "AI Report (deterministisch)", desc: "Weniger kreative, stabilere Texte", Icon: Bot },
                 { key: "gridBackground", label: "Subtiles Grid", desc: "Gitter‑Hintergrund im Layout", Icon: Grid3X3 },
                 { key: "devRibbon", label: "DEV Ribbon", desc: "Zeigt DEV‑Banner oben rechts", Icon: Info },
-                { key: "reducedMotion", label: "Weniger Animationen", desc: "Reduziert Animationen/Transitions (Performance)", Icon: Monitor },
-                { key: "autoRefresh", label: "Auto‑Refresh", desc: "Regelmässig Daten neu laden (1×/min)", Icon: Clock3 },
-                { key: "readOnlyMode", label: "Schreibschutz (Read‑Only)", desc: "Blockiert Änderungen – ideal für Demos", Icon: Lock },
+                { key: "reducedMotion", label: "Weniger Animationen", desc: "Reduziert Animationen/Transitions", Icon: Monitor },
+                { key: "autoRefresh", label: "Auto‑Refresh", desc: "Daten neu laden (1×/min)", Icon: Clock3 },
+                { key: "readOnlyMode", label: "Schreibschutz", desc: "Blockiert Änderungen", Icon: Lock },
               ] as const).map(({ key, label, desc, Icon }) => {
                 const active = !!flags[key]
                 return (
                   <div
                     key={key}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-8 py-8 flex items-center justify-between gap-6 hover:bg-white/10 transition cursor-pointer"
+                    className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 px-3 sm:px-8 py-3 sm:py-8 flex items-center justify-between gap-3 sm:gap-6 hover:bg-white/10 transition cursor-pointer"
                     onClick={() => toggleFlag(key)}
                     role="switch"
                     aria-checked={active}
                     aria-label={`${label} ${active ? "ON" : "OFF"}`}
                   >
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-slate-200/10 to-white/10 border border-white/10 flex items-center justify-center">
-                        <Icon className="h-4 w-4 text-slate-200" />
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                      <div className="h-8 w-8 sm:h-11 sm:w-11 rounded-lg bg-gradient-to-br from-slate-200/10 to-white/10 border border-white/10 flex items-center justify-center flex-shrink-0">
+                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-200" />
                       </div>
                       <div className="min-w-0">
-                        <div className="font-semibold text-slate-200 truncate text-[15px]">{label}</div>
-                        <div className="text-xs text-slate-400 truncate mt-2 leading-relaxed">{desc}</div>
+                        <div className="font-semibold text-slate-200 truncate text-xs sm:text-[15px]">{label}</div>
+                        <div className="text-[10px] sm:text-xs text-slate-400 truncate mt-0.5 sm:mt-2 leading-relaxed">{desc}</div>
                       </div>
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleFlag(key) }}
-                      className={`relative h-8 w-16 rounded-full border transition-all ${active ? "bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/40 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]" : "bg-white/10 border-white/20"}`}
+                      className={`relative h-6 w-12 sm:h-8 sm:w-16 rounded-full border transition-all flex-shrink-0 ${active ? "bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/40 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]" : "bg-white/10 border-white/20"}`}
                       aria-pressed={active}
                       aria-label={`${label} ${active ? "ON" : "OFF"}`}
                     >
                       <span
-                        className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-white/90 dark:bg-slate-900/90 shadow transition-transform ${active ? "translate-x-8" : ""}`}
+                        className={`absolute top-0.5 sm:top-1 left-0.5 sm:left-1 h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-white/90 dark:bg-slate-900/90 shadow transition-transform ${active ? "translate-x-6 sm:translate-x-8" : ""}`}
                       />
                     </button>
                   </div>
@@ -1037,59 +1041,59 @@ export default function AdminPage() {
         </TabsContent>
 
         {/* SYSTEM */}
-        <TabsContent value="system" className="space-y-8">
+        <TabsContent value="system" className="space-y-4 sm:space-y-8">
           <Card className="glass-card">
-            <CardHeader className="p-6 pb-4 flex items-center justify-between">
-              <CardTitle>Systeminformationen</CardTitle>
-              <Button variant="outline" size="sm" className="glass-card" onClick={copyDiagnostics}><Info className="h-4 w-4 mr-2" /> Copy diagnostics</Button>
+            <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <CardTitle className="text-sm sm:text-base">Systeminformationen</CardTitle>
+              <Button variant="outline" size="sm" className="glass-card h-7 sm:h-8 text-[10px] sm:text-sm self-end sm:self-auto" onClick={copyDiagnostics}><Info className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Copy diagnostics</Button>
             </CardHeader>
-            <CardContent className="p-6 pt-0 space-y-7">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center">
-                    <Clock3 className="h-5 w-5 text-white" />
+            <CardContent className="p-3 sm:p-6 pt-0 space-y-3 sm:space-y-7">
+              <div className="grid grid-cols-2 gap-2 sm:gap-7">
+                <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-6 flex items-center gap-2 sm:gap-4">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-indigo-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    <Clock3 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div>
-                    <div className="text-xs text-slate-400">Timezone</div>
-                    <div className="font-medium text-slate-200">{Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500/30 to-lime-500/30 border border-white/10 flex items-center justify-center">
-                    <Globe className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400">Locale</div>
-                    <div className="font-medium text-slate-200">{typeof navigator !== "undefined" ? navigator.language : "—"}</div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] sm:text-xs text-slate-400">Timezone</div>
+                    <div className="font-medium text-xs sm:text-sm text-slate-200 truncate">{Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500/30 to-orange-500/30 border border-white/10 flex items-center justify-center">
-                    <Monitor className="h-5 w-5 text-white" />
+                <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-6 flex items-center gap-2 sm:gap-4">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-emerald-500/30 to-lime-500/30 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <div className="text-xs text-slate-400">Theme Mode</div>
-                    <div className="font-medium text-slate-200">{typeof document !== "undefined" ? (document.documentElement.getAttribute("data-theme-mode") || "auto") : "—"}</div>
-                    <div className="mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs">
-                      {prefersDark ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-                      <span className="text-slate-300">{prefersDark ? "Prefers Dark" : "Prefers Light"}</span>
+                  <div className="min-w-0">
+                    <div className="text-[10px] sm:text-xs text-slate-400">Locale</div>
+                    <div className="font-medium text-xs sm:text-sm text-slate-200 truncate">{typeof navigator !== "undefined" ? navigator.language : "—"}</div>
+                  </div>
+                </div>
+                <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-6 flex items-center gap-2 sm:gap-4">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-amber-500/30 to-orange-500/30 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] sm:text-xs text-slate-400">Theme Mode</div>
+                    <div className="font-medium text-xs sm:text-sm text-slate-200">{typeof document !== "undefined" ? (document.documentElement.getAttribute("data-theme-mode") || "auto") : "—"}</div>
+                    <div className="mt-0.5 sm:mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs">
+                      {prefersDark ? <Moon className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> : <Sun className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
+                      <span className="text-slate-300">{prefersDark ? "Dark" : "Light"}</span>
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500/30 to-sky-500/30 border border-white/10 flex items-center justify-center">
-                    <Wifi className="h-5 w-5 text-white" />
+                <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-6 flex items-center gap-2 sm:gap-4">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-cyan-500/30 to-sky-500/30 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div>
-                    <div className="text-xs text-slate-400">Network</div>
-                    <div className={`font-medium ${viewport.online ? "text-emerald-300" : "text-red-300"}`}>{viewport.online ? "Online" : "Offline"}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">Viewport {viewport.w}×{viewport.h} @ {viewport.dpr}x</div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] sm:text-xs text-slate-400">Network</div>
+                    <div className={`font-medium text-xs sm:text-sm ${viewport.online ? "text-emerald-300" : "text-red-300"}`}>{viewport.online ? "Online" : "Offline"}</div>
+                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">{viewport.w}×{viewport.h} @ {viewport.dpr}x</div>
                   </div>
                 </div>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <div className="text-xs text-slate-400 mb-1">User Agent</div>
-                <div className="font-mono text-xs text-slate-300 break-words">{typeof navigator !== "undefined" ? navigator.userAgent : "—"}</div>
+              <div className="rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-6">
+                <div className="text-[10px] sm:text-xs text-slate-400 mb-1">User Agent</div>
+                <div className="font-mono text-[10px] sm:text-xs text-slate-300 break-words line-clamp-3 sm:line-clamp-none">{typeof navigator !== "undefined" ? navigator.userAgent : "—"}</div>
               </div>
             </CardContent>
           </Card>
