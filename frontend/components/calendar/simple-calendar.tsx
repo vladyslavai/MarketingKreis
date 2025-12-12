@@ -518,9 +518,29 @@ export default function SimpleCalendarView({
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4 md:p-5 min-h-[88px] flex items-start gap-3">
                   <User className="h-4 w-4 text-purple-300 mt-0.5 shrink-0" />
-                  <div>
-                    <div className="text-xs text-slate-400">Verantwortlich</div>
-                    <div className="mt-1 font-semibold text-slate-100">{selectedActivity.owner?.name || 'Unassigned'}</div>
+                  <div className="space-y-1">
+                    <div>
+                      <div className="text-xs text-slate-400">Verantwortlich</div>
+                      <div className="mt-1 font-semibold text-slate-100">
+                        {selectedActivity.owner?.name || "Unassigned"}
+                      </div>
+                    </div>
+                    {(selectedActivity as any)?.companyName && (
+                      <div className="text-[11px] text-slate-400">
+                        Unternehmen:{" "}
+                        <span className="text-slate-100">
+                          {(selectedActivity as any).companyName}
+                        </span>
+                      </div>
+                    )}
+                    {(selectedActivity as any)?.projectName && (
+                      <div className="text-[11px] text-slate-400">
+                        Deal:{" "}
+                        <span className="text-slate-100">
+                          {(selectedActivity as any).projectName}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4 md:p-5 min-h-[88px] flex items-start gap-3">

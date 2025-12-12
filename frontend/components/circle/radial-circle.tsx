@@ -16,6 +16,11 @@ export type Activity = {
   ownerId?: string
   owner?: { name: string }
   notes?: string
+  // Optional links into CRM
+  companyId?: string
+  companyName?: string
+  projectId?: string
+  projectName?: string
 }
 
 interface RadialCircleProps {

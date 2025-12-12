@@ -72,6 +72,12 @@ export default function CalendarPage() {
   const safeEvents = Array.isArray(events) ? events : []
   const expandRecurrence = (e: any): Activity[] => {
     const rec = (e as any).recurrence
+    const companyId = (e as any).company_id
+    const projectId = (e as any).project_id
+    const company = companies.find((c: any) => String(c.id ?? c._id) === String(companyId))
+    const project = (projects as any[] | undefined)?.find(
+      (p: any) => String(p.id ?? p._id) === String(projectId)
+    )
     const base: Activity = {
       id: String(e.id),
       title: e.title,
@@ -87,7 +93,12 @@ export default function CalendarPage() {
         ? { name: String((e as any).owner.full_name || (e as any).owner.email || "") }
         : undefined,
       notes: (e as any).description || (e as any).notes,
-      // @ts-ignore
+      // Enriched CRM links for UI
+      companyId: companyId ? String(companyId) : undefined,
+      companyName: company?.name,
+      projectId: project ? String(project.id ?? project._id) : undefined,
+      projectName: project?.title,
+      // @ts-ignore - Activity.color is optional
       color: (e as any)?.color,
     }
     if (!rec || !rec.freq) return [base]
