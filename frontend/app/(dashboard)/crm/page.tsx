@@ -46,6 +46,7 @@ import { companiesAPI, contactsAPI, dealsAPI, authFetch } from "@/lib/api"
 import { sync } from "@/lib/sync"
 import { CompanyDialog } from "@/components/crm/company-dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { useAuth } from "@/hooks/use-auth"
 
 type Company = any
 type Contact = any
@@ -87,6 +88,7 @@ export default function CRMPage() {
   })
   const [errors, setErrors] = useState<Record<string,string>>({})
   const [validation, setValidation] = useState<Record<string, boolean>>({})
+  const { user } = useAuth()
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -173,10 +175,59 @@ export default function CRMPage() {
     setErrors(e)
     if (Object.keys(e).length) return
     
-    await authFetch('/crm/contacts', { method: 'POST', body: JSON.stringify(newContact) }).catch(() => {})
-    setNewContact({ name: "", email: "", phone: "", company: "", title: "" })
-    setValidation({})
-    await refreshAll()
+    try {
+      // Map full name to first/last name for backend schema
+      const trimmed = String(newContact.name || "").trim()
+      const [first, ...rest] = trimmed.split(/\s+/)
+      const last = rest.join(" ") || first
+
+      // Try to resolve company_id by name (best-effort)
+      let companyId: number | undefined = undefined
+      const companyName = String(newContact.company || "").trim().toLowerCase()
+      if (companyName) {
+        const match = companies.find((c: any) =>
+          String(c.name || "").trim().toLowerCase() === companyName
+        )
+        if (match?.id) companyId = Number(match.id)
+      }
+
+      const payload: any = {
+        first_name: first,
+        last_name: last,
+        email: newContact.email || undefined,
+        phone: newContact.phone || undefined,
+        position: newContact.title || undefined,
+        company_id: companyId,
+      }
+
+      const res = await authFetch("/crm/contacts", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const detail = await res.text().catch(() => "")
+        console.error("Failed to create contact", res.status, detail)
+        toast({
+          title: "Kontakt konnte nicht gespeichert werden",
+          description: `Server: ${res.status}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      setNewContact({ name: "", email: "", phone: "", company: "", title: "" })
+      setValidation({})
+      await refreshAll()
+      sync.emit("crm:contacts:changed")
+      toast({ title: "✅ Kontakt hinzugefügt" })
+    } catch (err) {
+      console.error("addContact error", err)
+      toast({
+        title: "Fehler beim Speichern des Kontakts",
+        description: "Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      })
+    }
   }
 
   const addDeal = async () => {
@@ -186,11 +237,76 @@ export default function CRMPage() {
     setErrors(e)
     if (Object.keys(e).length) return
     
-    const payload = { ...newDeal, value: Number(newDeal.value) || 0, probability: Number(newDeal.probability) || 0 }
-    await authFetch('/crm/deals', { method: 'POST', body: JSON.stringify(payload) }).catch(() => {})
-    setNewDeal({ title: "", company: "", value: "", probability: 50, stage: "lead", expected_close_date: "" })
-    setValidation({})
-    await refreshAll()
+    try {
+      // Normalize stage to allowed backend values
+      const allowedStages = ["lead", "qualified", "proposal", "negotiation", "won", "lost"]
+      let stage = String(newDeal.stage || "lead").toLowerCase()
+      if (!allowedStages.includes(stage)) stage = "lead"
+
+      // Resolve company_id by name (best-effort)
+      let companyId: number | undefined = undefined
+      const companyName = String(newDeal.company || "").trim().toLowerCase()
+      if (companyName) {
+        const match = companies.find((c: any) =>
+          String(c.name || "").trim().toLowerCase() === companyName
+        )
+        if (match?.id) companyId = Number(match.id)
+      }
+
+      const ownerName =
+        (user as any)?.email ||
+        (user as any)?.name ||
+        "Unbekannter Besitzer"
+
+      const payload: any = {
+        company_id: companyId,
+        contact_id: undefined,
+        title: newDeal.title.trim(),
+        value: Number(newDeal.value) || 0,
+        stage,
+        probability: Number(newDeal.probability) || 0,
+        expected_close_date: newDeal.expected_close_date
+          ? new Date(newDeal.expected_close_date).toISOString()
+          : undefined,
+        owner: ownerName,
+        notes: undefined,
+      }
+
+      const res = await authFetch("/crm/deals", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const detail = await res.text().catch(() => "")
+        console.error("Failed to create deal", res.status, detail)
+        toast({
+          title: "Deal konnte nicht gespeichert werden",
+          description: `Server: ${res.status}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      setNewDeal({
+        title: "",
+        company: "",
+        value: "",
+        probability: 50,
+        stage: "lead",
+        expected_close_date: "",
+      })
+      setValidation({})
+      await refreshAll()
+      sync.emit("crm:deals:changed")
+      toast({ title: "✅ Deal hinzugefügt" })
+    } catch (err) {
+      console.error("addDeal error", err)
+      toast({
+        title: "Fehler beim Speichern des Deals",
+        description: "Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      })
+    }
   }
 
   const clearForm = (entity: string) => {
