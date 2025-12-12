@@ -165,8 +165,8 @@ function SignupInner() {
       {/* Grid overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 sm:px-8 py-12">
+        <div className="w-full max-w-lg">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 p-3 backdrop-blur-sm">
@@ -181,8 +181,8 @@ function SignupInner() {
           </div>
 
           {/* Card */}
-          <Card className="w-full border-slate-800/50 bg-slate-900/70 text-slate-200 shadow-2xl shadow-violet-500/5 backdrop-blur-xl">
-            <CardHeader className="space-y-1 pb-4">
+          <Card className="w-full border-slate-800/60 bg-slate-900/75 text-slate-200 shadow-2xl shadow-violet-500/5 backdrop-blur-xl rounded-3xl">
+            <CardHeader className="space-y-1 px-5 sm:px-7 pt-5 pb-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <CardTitle className="flex items-center gap-2 text-xl">
@@ -226,7 +226,7 @@ function SignupInner() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-5 sm:px-7 pb-6 sm:pb-7 pt-1">
               {/* Global messages */}
               {message && (
                 <div
