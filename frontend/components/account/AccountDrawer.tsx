@@ -83,8 +83,8 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
         }`}
       >
         <div className="relative h-full overflow-hidden">
-          {/* Background with gradient */}
-          <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl" />
+          {/* Background with gradient - respects light/dark theme */}
+          <div className="absolute inset-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl" />
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
           
           {/* Decorative glow */}
@@ -119,8 +119,8 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-white/10 bg-slate-950/50">
-              <div className="flex items-center justify-between text-xs text-slate-500">
+            <div className="px-6 py-4 border-t border-white/10 bg-white/80 dark:bg-slate-950/60">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                 <span>KABOOM Marketing Platform</span>
                 <span>v1.0.0</span>
               </div>
