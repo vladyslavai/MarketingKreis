@@ -75,18 +75,20 @@ export default function CalendarPage() {
     const base: Activity = {
       id: String(e.id),
       title: e.title,
-      category: (e as any).category ? String((e as any).category) as any : ("KUNDENPFLEGE" as const),
-      status: "ACTIVE" as const,
-    weight: 1,
-    budgetCHF: 0,
-    expectedLeads: 0,
+      category: (e as any).category ? (String((e as any).category) as any) : ("KUNDENPFLEGE" as const),
+      status: ((e as any).status as any) || ("PLANNED" as const),
+      weight: 1,
+      budgetCHF: 0,
+      expectedLeads: 0,
       start: new Date(e.start),
-      end: e.end ? new Date(e.end) : undefined,
-    ownerId: undefined,
-    owner: undefined,
+      end: e.end ? new Date(e.end as any) : undefined,
+      ownerId: (e as any).owner_id ? String((e as any).owner_id) : undefined,
+      owner: (e as any).owner
+        ? { name: String((e as any).owner.full_name || (e as any).owner.email || "") }
+        : undefined,
       notes: (e as any).description || (e as any).notes,
       // @ts-ignore
-      color: (e as any)?.color
+      color: (e as any)?.color,
     }
     if (!rec || !rec.freq) return [base]
     const occurrences: Activity[] = []
