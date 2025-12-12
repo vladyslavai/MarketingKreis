@@ -397,8 +397,24 @@ export default function ActivitiesPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                          className="h-7 px-2 text-xs shrink-0 glass-card"
-                        onClick={async (e) => { e.stopPropagation(); try { await deleteActivity?.(a.id); await refresh?.(); } catch (err) { console.error(err) } }}
+                        className="h-7 px-2 text-xs shrink-0 glass-card"
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          try {
+                            // Simple confirm to avoid accidental taps on Mobile
+                            const ok = typeof window === "undefined"
+                              ? true
+                              : window.confirm("Aktivität wirklich löschen?")
+                            if (!ok) return
+                            // Always pass id as string and rely on hook to handle SWR refresh
+                            await deleteActivity?.(String(a.id))
+                          } catch (err) {
+                            console.error("Failed to delete activity", err)
+                            if (typeof window !== "undefined") {
+                              window.alert("Aktivität konnte nicht gelöscht werden. Bitte später erneut versuchen.")
+                            }
+                          }
+                        }}
                       >
                         Löschen
                       </Button>
