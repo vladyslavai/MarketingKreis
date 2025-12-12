@@ -13,6 +13,7 @@ export default function BudgetPage() {
   const [pct, setPct] = useState(20)
   const [elasticity, setElasticity] = useState(0.8)
   const [scenario, setScenario] = useState<any | null>(null)
+  const [scenarioOpen, setScenarioOpen] = useState(true)
 
   const period = useMemo(() => {
     const now = new Date()
@@ -93,7 +94,7 @@ export default function BudgetPage() {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 pb-24 md:pb-8 space-y-6 sm:space-y-8">
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-6 sm:p-8">
         <div className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-gradient-to-tr from-fuchsia-500/30 to-blue-500/30 blur-3xl animate-gradient-shift" />
@@ -115,17 +116,35 @@ export default function BudgetPage() {
         </div>
       </div>
 
-      {/* Budget Scenario – premium controls */}
+      {/* Budget Scenario – premium controls (collapsible) */}
       <Card className="glass-card overflow-hidden border border-white/15 bg-slate-950/80">
-        <CardHeader className="border-b border-white/10 px-5 sm:px-6 pt-4 pb-5">
+        <CardHeader
+          className="border-b border-white/10 px-5 sm:px-6 pt-4 pb-4 cursor-pointer select-none"
+          onClick={() => setScenarioOpen((v) => !v)}
+        >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-white text-lg sm:text-xl flex items-center gap-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/20 border border-blue-400/40">
-                  %
-                </span>
-                Budget Scenario
-              </CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-white text-lg sm:text-xl flex items-center gap-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/20 border border-blue-400/40">
+                    %
+                  </span>
+                  Budget Scenario
+                </CardTitle>
+                <button
+                  type="button"
+                  aria-label={scenarioOpen ? "Einklappen" : "Ausklappen"}
+                  className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900/70 border border-white/15 text-xs text-slate-200 hover:bg-slate-800 transition"
+                >
+                  <span
+                    className={`transition-transform duration-200 ${
+                      scenarioOpen ? "rotate-0" : "-rotate-90"
+                    }`}
+                  >
+                    ▾
+                  </span>
+                </button>
+              </div>
               <p className="text-xs text-slate-400 max-w-xl">
                 Spiele mit Budget & Elastizität und sieh in Echtzeit, wie sich Umsatz, Conversion und Deals verändern.
               </p>
@@ -134,16 +153,17 @@ export default function BudgetPage() {
               <div className="grid grid-cols-2 gap-3 text-xs sm:text-[11px] text-slate-300">
                 <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="uppercase tracking-[0.14em] text-[10px] text-emerald-300/80">Revenue Impact</span>
+                    <span className="uppercase tracking-[0.14em] text-[10px] text-emerald-300/80">
+                      Revenue Impact
+                    </span>
                     <span className="text-emerald-200 font-semibold">
-                      {scenario.scenario.revenue >= (budgetData?.kpiTargets?.find((k:any)=>k.id==="revenue")?.current || 0)
+                      {scenario.scenario.revenue >=
+                      (budgetData?.kpiTargets?.find((k: any) => k.id === "revenue")?.current || 0)
                         ? "+↑"
                         : "↓"}
                     </span>
                   </div>
-                  <div className="mt-1 text-sm font-semibold">
-                    {chf(scenario.scenario.revenue || 0)}
-                  </div>
+                  <div className="mt-1 text-sm font-semibold">{chf(scenario.scenario.revenue || 0)}</div>
                 </div>
                 <div className="rounded-xl border border-blue-400/40 bg-blue-500/10 px-3 py-2">
                   <div className="uppercase tracking-[0.14em] text-[10px] text-blue-200/80">Conversion</div>
@@ -155,7 +175,12 @@ export default function BudgetPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-5 px-5 sm:px-6 pt-5 pb-5 sm:pb-6">
+        {/* Collapsible body */}
+        <CardContent
+          className={`space-y-5 px-5 sm:px-6 transition-all duration-200 ${
+            scenarioOpen ? "pt-5 pb-5 sm:pb-6 opacity-100" : "pt-0 pb-0 max-h-0 opacity-0 overflow-hidden"
+          }`}
+        >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-slate-300">

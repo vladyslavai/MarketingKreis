@@ -11,6 +11,8 @@ import { sync } from "@/lib/sync"
 import { ResponsiveContainer, AreaChart, Area } from "recharts"
 import { GlassSelect } from "@/components/ui/glass-select"
 import { Input } from "@/components/ui/input"
+import KanbanBoard, { type TaskStatus as KanbanStatus } from "@/components/kanban/kanban-board"
+import { useContentData, type ContentTask } from "@/hooks/use-content-data"
 
 type ContentStatus = "idea" | "draft" | "review" | "approved" | "published"
 
@@ -25,16 +27,145 @@ interface ContentItem {
   priority: "low" | "medium" | "high"
 }
 
+interface TaskQuickCreateProps {
+  defaultStatus: KanbanStatus
+  onCreate: (payload: {
+    title: string
+    channel: string
+    format?: string
+    status: KanbanStatus
+    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+    notes?: string
+    deadline?: Date
+  }) => Promise<void> | void
+}
+
+function TaskQuickCreate({ defaultStatus, onCreate }: TaskQuickCreateProps) {
+  const [title, setTitle] = useState("")
+  const [channel, setChannel] = useState("Website")
+  const [format, setFormat] = useState<string | undefined>("Landing Page")
+  const [priority, setPriority] = useState<"LOW" | "MEDIUM" | "HIGH" | "URGENT">("MEDIUM")
+  const [deadline, setDeadline] = useState<string>("")
+  const [notes, setNotes] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!title.trim()) return
+    setSaving(true)
+    try {
+      await onCreate({
+        title: title.trim(),
+        channel,
+        format,
+        status: defaultStatus,
+        priority,
+        notes: notes.trim() || undefined,
+        deadline: deadline ? new Date(deadline) : undefined,
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 pt-2">
+      <div className="space-y-1">
+        <label className="text-xs text-slate-300">Titel</label>
+        <Input
+          autoFocus
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="z.B. Q4 Launch Landingpage"
+          className="h-9 text-sm"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <label className="text-xs text-slate-300">Channel</label>
+          <GlassSelect
+            value={channel}
+            onChange={(v) => setChannel(v)}
+            options={[
+              { value: "Website", label: "Website" },
+              { value: "Email", label: "Email" },
+              { value: "Social Media", label: "Social Media" },
+              { value: "Blog", label: "Blog" },
+            ]}
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-slate-300">Format</label>
+          <Input
+            value={format || ""}
+            onChange={(e) => setFormat(e.target.value || undefined)}
+            placeholder="Landing Page, Newsletter..."
+            className="h-9 text-sm"
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <label className="text-xs text-slate-300">Priorität</label>
+          <GlassSelect
+            value={priority}
+            onChange={(v) => setPriority(v as any)}
+            options={[
+              { value: "LOW", label: "Niedrig" },
+              { value: "MEDIUM", label: "Mittel" },
+              { value: "HIGH", label: "Hoch" },
+              { value: "URGENT", label: "Dringend" },
+            ]}
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-slate-300">Fällig am</label>
+          <Input
+            type="date"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            className="h-9 text-sm"
+          />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs text-slate-300">Notizen</label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="min-h-[60px] w-full rounded-md bg-slate-950/60 border border-slate-700 px-2 py-1.5 text-xs"
+          placeholder="Kurzbeschreibung / nächste Schritte..."
+        />
+      </div>
+      <div className="flex justify-end gap-2 pt-1">
+        <Button type="submit" size="sm" disabled={saving || !title.trim()}>
+          {saving ? "Speichere..." : "Task erstellen"}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
 export default function ContentPage() {
   const { openModal } = useModal()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deals, setDeals] = useState<any[]>([])
+  // локальный список контент‑элементов как раньше (для KPI + Grid),
+  // но тасковая система теперь опирается на useContentData
   const [contents, setContents] = useState<ContentItem[]>([
     { id: 1, title: "Q1 Marketing Blog Post", type: "blog", status: "draft", assignee: "Anna Schmidt", dueDate: "2024-01-20", tags: ["Marketing", "Blog"], priority: "high" },
     { id: 2, title: "Instagram Carousel - Product Launch", type: "social", status: "review", assignee: "Peter Weber", dueDate: "2024-01-18", tags: ["Social Media", "Product"], priority: "high" },
     { id: 3, title: "Welcome Email Template", type: "email", status: "approved", assignee: "Hans Müller", dueDate: "2024-01-22", tags: ["Email", "Onboarding"], priority: "medium" },
   ])
+  const {
+    tasks,
+    loading: tasksLoading,
+    error: tasksError,
+    addTask,
+    updateTask,
+    deleteTask,
+  } = useContentData()
   const [view, setView] = useState<"grid" | "kanban">(() => {
     if (typeof window === "undefined") return "grid"
     return (localStorage.getItem("contentView") as "grid" | "kanban") || "grid"
@@ -325,7 +456,7 @@ export default function ContentPage() {
         ))}
       </div>
 
-      {/* Content items section: Grid or Kanban */}
+      {/* Content items section: Grid or Kanban (визуальный уровень 2, локальные элементы) */}
       {view === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredContents.map((c) => (
@@ -399,6 +530,54 @@ export default function ContentPage() {
           })}
         </div>
       )}
+
+      {/* Task Board – реальная двухуровневая система задач, сохраняется в Backend */}
+      <Card className="glass-card">
+        <CardHeader className="px-4 sm:px-6 pt-4 pb-3 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/20 border border-blue-400/40 text-xs">
+                  ✦
+                </span>
+                Task Board
+              </CardTitle>
+              <p className="text-xs text-slate-400 mt-1">
+                Operative Aufgaben für Content‑Produktion. Alle manuellen Tasks werden im Backend gespeichert.
+              </p>
+            </div>
+            <div className="text-[11px] text-slate-400">
+              {tasksLoading ? "Lade Tasks..." : `${tasks.length} Tasks gesamt`}
+              {tasksError && <span className="ml-2 text-amber-300">· {tasksError}</span>}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="px-2 sm:px-4 py-4">
+          <KanbanBoard
+            tasks={tasks}
+            onTaskMove={async (taskId, newStatus, _index) => {
+              const task = tasks.find(t => t.id === taskId)
+              if (!task) return
+              await updateTask(taskId, { status: newStatus as any })
+            }}
+            onCreateTask={(status: KanbanStatus) => {
+              openModal({
+                type: "custom",
+                title: "Neue Content‑Aufgabe",
+                content: (
+                  <TaskQuickCreate
+                    defaultStatus={status}
+                    onCreate={async (payload) => {
+                      await addTask(payload)
+                    }}
+                  />
+                ),
+              })
+            }}
+            onDeleteTask={(taskId) => deleteTask(taskId)}
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 }

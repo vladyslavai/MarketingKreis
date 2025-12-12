@@ -9,5 +9,6 @@ from app.models.deal import Deal  # noqa
 from app.models.job import Job  # noqa
 from app.models.upload import Upload  # noqa
 from app.models.user_category import UserCategory  # noqa
+from app.models.content_task import ContentTask  # noqa
 
 

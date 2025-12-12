@@ -45,6 +45,54 @@ export const crmAPI = {
   getStats: () => request<any>(`/crm/stats`),
 }
 
+// === Content Tasks ===
+
+export type ContentTaskDTO = {
+  id: number
+  title: string
+  channel: string
+  format?: string | null
+  status: "TODO" | "IN_PROGRESS" | "REVIEW" | "APPROVED" | "PUBLISHED" | "ARCHIVED"
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+  notes?: string | null
+  deadline?: string | null
+  activity_id?: number | null
+  owner_id?: number | null
+  created_at: string
+  updated_at: string
+}
+
+export type ContentTaskCreateDTO = {
+  title: string
+  channel?: string
+  format?: string | null
+  status?: ContentTaskDTO["status"]
+  priority?: ContentTaskDTO["priority"]
+  notes?: string | null
+  deadline?: string | null
+  activity_id?: number | null
+}
+
+export type ContentTaskUpdateDTO = Partial<ContentTaskCreateDTO>
+
+export const contentTasksAPI = {
+  list: () => request<ContentTaskDTO[]>(`/content/tasks`),
+  create: (payload: ContentTaskCreateDTO) =>
+    request<ContentTaskDTO>(`/content/tasks`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  update: (id: number, payload: ContentTaskUpdateDTO) =>
+    request<ContentTaskDTO>(`/content/tasks/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  delete: (id: number) =>
+    request<{ ok: boolean; id: number }>(`/content/tasks/${id}`, {
+      method: "DELETE",
+    }),
+}
+
 // User Categories persisted in backend
 export type UserCategory = {
   id?: number
