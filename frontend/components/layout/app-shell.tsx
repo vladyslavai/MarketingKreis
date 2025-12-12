@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { ModalProvider } from "@/components/ui/modal/ModalProvider"
@@ -15,6 +15,46 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [flags, setFlags] = useState<Record<string, boolean>>({})
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleSidebar = () => setSidebarCollapsed((v) => !v)
+
+  // Swipe-to-open for mobile sidebar
+  const touchStartXRef = useRef<number | null>(null)
+  const touchStartYRef = useRef<number | null>(null)
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (typeof window === "undefined") return
+    if (window.innerWidth >= 768) return // only on mobile
+    if (mobileMenuOpen) return
+    if (e.touches.length !== 1) return
+
+    const touch = e.touches[0]
+    // only start gesture very close to the left edge
+    if (touch.clientX > 24) return
+
+    touchStartXRef.current = touch.clientX
+    touchStartYRef.current = touch.clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (typeof window === "undefined") return
+    if (window.innerWidth >= 768) return
+    if (mobileMenuOpen) return
+    if (touchStartXRef.current == null || touchStartYRef.current == null) return
+
+    const touch = e.changedTouches[0]
+    const dx = touch.clientX - touchStartXRef.current
+    const dy = touch.clientY - touchStartYRef.current
+
+    // simple horizontal swipe-right detection
+    const horizontalEnough = Math.abs(dx) > 40
+    const verticalStable = Math.abs(dy) < 40
+
+    if (dx > 0 && horizontalEnough && verticalStable) {
+      setMobileMenuOpen(true)
+    }
+
+    touchStartXRef.current = null
+    touchStartYRef.current = null
+  }
 
   // react to feature flags
   useEffect(() => {
@@ -71,7 +111,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <ModalProvider>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950" style={bgStyle}>
+      <div
+        className="min-h-screen bg-slate-50 dark:bg-slate-950"
+        style={bgStyle}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Sidebar */}
         <div className="hidden md:block">
         <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
