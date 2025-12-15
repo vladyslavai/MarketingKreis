@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 // This avoids any 127.0.0.1 calls in the Vercel environment.
 export async function POST(req: NextRequest) {
   try {
-    const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "https://kreismarketing-backend.onrender.com").replace(/\/$/, "")
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend.onrender.com").replace(/\/$/, "")
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 9000)
 

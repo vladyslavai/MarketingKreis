@@ -80,8 +80,8 @@ function SignupInner() {
     setMessage(null)
     setSuccess(false)
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend.onrender.com"
-      const url = `${base.replace(/\/$/, "")}/auth/register`
+      const base = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend.onrender.com").replace(/\/$/, "")
+      const url = `${base}/auth/register`
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

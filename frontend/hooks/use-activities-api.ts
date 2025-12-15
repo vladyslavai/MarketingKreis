@@ -3,8 +3,6 @@
 import useSWR from 'swr'
 import { authFetch } from '@/lib/api'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-
 export interface Activity {
   id: string
   title: string

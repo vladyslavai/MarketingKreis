@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 // Proxy for logout – clears backend auth cookies through the same origin.
 export async function POST(req: NextRequest) {
   try {
-    const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "https://kreismarketing-backend.onrender.com").replace(/\/$/, "")
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://kreismarketing-backend.onrender.com").replace(/\/$/, "")
     const cookie = req.headers.get("cookie") || ""
 
     const res = await fetch(`${apiUrl}/auth/logout`, {

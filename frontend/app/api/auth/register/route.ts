@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
   try {
-    const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://kreismarketing-backend.onrender.com').replace(/\/$/, '')
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://kreismarketing-backend.onrender.com').replace(/\/$/, '')
     // Use explicit AbortController to avoid platform 10s timeouts (set to 9s)
     const controller = new AbortController()
     const t = setTimeout(() => controller.abort(), 9000)

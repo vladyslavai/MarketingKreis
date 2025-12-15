@@ -418,7 +418,7 @@ export default function SimpleCalendarView({
                             setAiLoading(true)
                             try {
                               // Try server first (optional best-effort)
-                              const base = process.env.NEXT_PUBLIC_API_BASE_URL || ''
+                              const base = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '')
                               const res = await fetch(`${base}/ai/activity_suggest`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
                                 company_id: undefined,
                                 draft: { title: draft?.title, description: draft?.notes, type: 'event' }

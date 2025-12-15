@@ -1,3 +1,229 @@
+\"use client\"
+
+import { useState } from "react"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { useUploadsApi } from "@/hooks/use-uploads-api"
+
+type PreviewState = {
+  headers: string[]
+  samples: any[]
+  mapping: Record<string, string | null>
+}
+
+export default function UploadsPage() {
+  const { uploads, previewFile, uploadFile, refresh } = useUploadsApi()
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<PreviewState | null>(null)
+  const [loadingPreview, setLoadingPreview] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleFileChange = async (f: File | null) => {
+    setError(null)
+    setPreview(null)
+    setFile(f)
+    if (!f) return
+    try {
+      setLoadingPreview(true)
+      const res = await previewFile(f)
+      setPreview({
+        headers: res.headers,
+        samples: res.samples,
+        mapping: res.suggested_mapping || {},
+      })
+    } catch (e: any) {
+      setError(e?.message || "Preview failed")
+    } finally {
+      setLoadingPreview(false)
+    }
+  }
+
+  const handleUpload = async () => {
+    if (!file) return
+    try {
+      setError(null)
+      setUploading(true)
+      await uploadFile(file, undefined, preview?.mapping)
+      setFile(null)
+      setPreview(null)
+      await refresh()
+    } catch (e: any) {
+      setError(e?.message || "Upload failed")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-white">Uploads</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Lade eine CSV- oder Excel-Tabelle hoch, sieh dir ein Preview an und importiere die Aktivitäten in das System.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="border-slate-300 dark:border-white/20"
+          onClick={() => refresh()}
+        >
+          Neu laden
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 items-start">
+        <Card className="lg:col-span-1 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
+          <CardHeader>
+            <CardTitle className="text-slate-900 dark:text-white">Datei auswählen</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <input
+              type="file"
+              accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+              className="block w-full text-sm text-slate-900 dark:text-slate-100 file:mr-4 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-200 dark:file:bg-slate-800 dark:file:text-slate-100 dark:hover:file:bg-slate-700"
+            />
+            {file && (
+              <div className="text-xs text-slate-600 dark:text-slate-400">
+                Ausgewählt: <span className="font-medium break-all">{file.name}</span>
+              </div>
+            )}
+            <Button
+              onClick={handleUpload}
+              disabled={!file || uploading}
+              className="w-full"
+            >
+              {uploading ? "Importiere…" : "Datei importieren"}
+            </Button>
+            {error && (
+              <div className="text-xs text-red-500 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-md px-2 py-1">
+                {error}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
+          <CardHeader>
+            <CardTitle className="text-slate-900 dark:text-white">
+              {loadingPreview ? "Lade Preview…" : "Preview & Feldzuordnung"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!preview && !loadingPreview && (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Wähle zuerst eine Datei aus, um ein Preview der ersten Zeilen zu sehen. Unterstützt werden CSV und XLSX.
+              </p>
+            )}
+            {preview && (
+              <div className="space-y-4">
+                <div className="overflow-auto border border-slate-200 dark:border-white/10 rounded-lg max-h-72">
+                  <table className="min-w-full text-xs">
+                    <thead className="bg-slate-50 dark:bg-slate-800/80">
+                      <tr>
+                        {preview.headers.map((h) => (
+                          <th key={h} className="px-2 py-1 text-left font-medium text-slate-600 dark:text-slate-200 whitespace-nowrap">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-slate-900">
+                      {preview.samples.map((row, idx) => (
+                        <tr key={idx} className="border-t border-slate-100 dark:border-slate-800">
+                          {preview.headers.map((h) => (
+                            <td key={h} className="px-2 py-1 text-slate-700 dark:text-slate-200 whitespace-nowrap">
+                              {String(row[h] ?? "")}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      {preview.samples.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={preview.headers.length || 1}
+                            className="px-2 py-4 text-center text-slate-500 dark:text-slate-400"
+                          >
+                            Keine Datenzeilen gefunden.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Empfohlene Zuordnung (kann bei Bedarf im Code angepasst werden):
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-xs">
+                    {Object.entries(preview.mapping).map(([field, header]) => (
+                      <div
+                        key={field}
+                        className="rounded-md border border-slate-200 dark:border-slate-700 px-2 py-1 bg-slate-50 dark:bg-slate-800/60"
+                      >
+                        <div className="font-semibold text-slate-700 dark:text-slate-100">{field}</div>
+                        <div className="text-slate-500 dark:text-slate-300">
+                          {header || <span className="italic text-slate-400">nicht zugeordnet</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10">
+        <CardHeader>
+          <CardTitle className="text-slate-900 dark:text-white">Bisherige Uploads</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {uploads.length === 0 ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Noch keine Uploads vorhanden.
+            </p>
+          ) : (
+            <div className="overflow-auto max-h-72">
+              <table className="min-w-full text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/80">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-200">Datei</th>
+                    <th className="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-200">Typ</th>
+                    <th className="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-200">Größe</th>
+                    <th className="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-200">Hochgeladen</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-slate-900">
+                  {uploads.map((u) => (
+                    <tr key={u.id} className="border-t border-slate-100 dark:border-slate-800">
+                      <td className="px-3 py-2 text-slate-700 dark:text-slate-100 break-all">
+                        {u.original_name}
+                      </td>
+                      <td className="px-3 py-2 text-slate-500 dark:text-slate-300">
+                        {u.file_type || "—"}
+                      </td>
+                      <td className="px-3 py-2 text-slate-500 dark:text-slate-300">
+                        {u.file_size ? `${u.file_size} B` : "—"}
+                      </td>
+                      <td className="px-3 py-2 text-slate-500 dark:text-slate-300 whitespace-nowrap">
+                        {u.created_at ? new Date(u.created_at).toLocaleString("de-DE") : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

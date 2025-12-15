@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCalendarApi } from "@/hooks/use-calendar-api"
 import { useModal } from "@/components/ui/modal/ModalProvider"
+import { apiBase } from "@/lib/api"
 import { format } from "date-fns"
 import { de } from "date-fns/locale"
 import { useEffect, useState } from "react"
@@ -26,8 +27,7 @@ export default function CalendarPage() {
   useEffect(() => {
     ;(async () => {
       try {
-        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/crm/companies`
-        const res = await fetch(url)
+        const res = await fetch(`${apiBase}/crm/companies`, { credentials: "include" })
         const data = await res.json().catch(() => [])
         setCompanies(Array.isArray(data) ? data : (data?.items ?? []))
       } catch {}
@@ -353,7 +353,8 @@ Hinweis: Bitte relevante Unterlagen mitbringen.`
     setAiLoading(true)
     try {
       if (selectedCompanyId) {
-        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/ai/activity_suggest`
+        const base = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '')
+        const url = `${base}/ai/activity_suggest`
         const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ company_id: selectedCompanyId, draft: { title, description, type: activityType } }) }).catch(()=>null)
         const data = await (res ? res.json().catch(()=>({})) : ({}))
         if (data?.title || data?.description) {
@@ -370,7 +371,8 @@ Hinweis: Bitte relevante Unterlagen mitbringen.`
     if (!aiPreview) return
     setAiLoading(true)
     try {
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/ai/activity_suggest`
+      const base = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '')
+      const url = `${base}/ai/activity_suggest`
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         company_id: selectedCompanyId || undefined,
         prompt: { title: aiPreview.title, description: aiPreview.desc }
@@ -398,7 +400,7 @@ Hinweis: Bitte relevante Unterlagen mitbringen.`
 
   // Fetch users/projects for selects (best-effort)
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_API_BASE_URL || ''
+    const base = apiBase
     ;(async () => {
       try {
         const [uRes, pRes] = await Promise.all([

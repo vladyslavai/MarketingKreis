@@ -2,7 +2,7 @@
 // Use same-origin proxy via Next.js rewrites to send cookies
 import { authFetch } from './auth-client'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '')
 
 export interface MarketingData {
   id: string
