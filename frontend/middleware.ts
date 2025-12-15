@@ -1,30 +1,67 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  // Important: Do NOT proxy /api/* here. Next.js rewrites (next.config.js) will
-  // forward requests to the backend and preserve body/cookies correctly.
+// Routes that require backend auth cookies (access_token / refresh_token)
+const PROTECTED_PATHS = [
+  '/dashboard',
+  '/activities',
+  '/crm',
+  '/calendar',
+  '/performance',
+  '/budget',
+  '/content',
+  '/reports',
+  '/uploads',
+  '/admin',
+]
 
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Hard redirect old /signin to the new combined auth page
+  // Legacy /signin → unified auth page
   if (pathname === '/signin') {
     const url = new URL('/signup?mode=login', request.url)
     return NextResponse.redirect(url)
   }
 
-  // NOTE: For the current demo setup we do NOT protect app pages on the Next.js layer,
-  // because authentication is handled directly by the backend service cookies.
-  // We still keep the /signin -> /signup redirect above, but let all other routes pass through.
+  // Do not intercept Next.js API routes
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+
+  // Gate protected app routes
+  const isProtected = PROTECTED_PATHS.some(
+    (base) => pathname === base || pathname.startsWith(`${base}/`),
+  )
+
+  if (isProtected) {
+    const access = request.cookies.get('access_token')?.value
+    const refresh = request.cookies.get('refresh_token')?.value
+
+    if (!access && !refresh) {
+      const url = new URL('/signup', request.url)
+      url.searchParams.set('mode', 'login')
+      url.searchParams.set('redirect', pathname || '/dashboard')
+      return NextResponse.redirect(url)
+    }
+  }
 
   return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    // Only handle auth entry pages; app pages are not gated here because
-    // backend authentication is done via its own cookies.
     '/signin',
     '/signup',
+    '/dashboard/:path*',
+    '/activities/:path*',
+    '/crm/:path*',
+    '/calendar/:path*',
+    '/performance/:path*',
+    '/budget/:path*',
+    '/content/:path*',
+    '/reports/:path*',
+    '/uploads/:path*',
+    '/admin/:path*',
   ],
 }
