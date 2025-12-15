@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
 
@@ -10,44 +10,21 @@ function getApiBase() {
   ).replace(/\/$/, "")
 }
 
-export async function GET(req: NextRequest) {
+export async function PATCH(
+  req: Request,
+  ctx: { params: { id: string } },
+) {
   const apiBase = getApiBase()
   const cookie = req.headers.get("cookie") || ""
-  try {
-    const res = await fetch(`${apiBase}/user/categories`, {
-      method: "GET",
-      headers: cookie ? { cookie } : {},
-      credentials: "include",
-      cache: "no-store",
-    })
-    const text = await res.text()
-    try {
-      const json = JSON.parse(text)
-      const resp = NextResponse.json(json, { status: res.status })
-      const setCookie = res.headers.get("set-cookie")
-      if (setCookie) resp.headers.set("set-cookie", setCookie)
-      return resp
-    } catch {
-      return new NextResponse(text, { status: res.status })
-    }
-  } catch (e: any) {
-    return NextResponse.json(
-      { error: e?.message || "Failed to load user categories" },
-      { status: 500 },
-    )
-  }
-}
+  const body = await req.text()
+  const target = `${apiBase}/admin/users/${encodeURIComponent(ctx.params.id)}`
 
-export async function PUT(req: NextRequest) {
-  const apiBase = getApiBase()
-  const cookie = req.headers.get("cookie") || ""
   try {
-    const body = await req.text()
-    const res = await fetch(`${apiBase}/user/categories`, {
-      method: "PUT",
+    const res = await fetch(target, {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        ...(cookie ? { cookie } : {}),
+        cookie,
       },
       body,
       credentials: "include",
@@ -56,16 +33,45 @@ export async function PUT(req: NextRequest) {
     const text = await res.text()
     try {
       const json = JSON.parse(text)
-      const resp = NextResponse.json(json, { status: res.status })
-      const setCookie = res.headers.get("set-cookie")
-      if (setCookie) resp.headers.set("set-cookie", setCookie)
-      return resp
+      return NextResponse.json(json, { status: res.status })
     } catch {
       return new NextResponse(text, { status: res.status })
     }
   } catch (e: any) {
     return NextResponse.json(
-      { error: e?.message || "Failed to save user categories" },
+      { error: e?.message || "Failed to update admin user" },
+      { status: 500 },
+    )
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  ctx: { params: { id: string } },
+) {
+  const apiBase = getApiBase()
+  const cookie = req.headers.get("cookie") || ""
+  const target = `${apiBase}/admin/users/${encodeURIComponent(ctx.params.id)}`
+
+  try {
+    const res = await fetch(target, {
+      method: "DELETE",
+      headers: {
+        cookie,
+      },
+      credentials: "include",
+      cache: "no-store",
+    })
+    const text = await res.text()
+    try {
+      const json = JSON.parse(text)
+      return NextResponse.json(json, { status: res.status })
+    } catch {
+      return new NextResponse(text, { status: res.status })
+    }
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message || "Failed to delete admin user" },
       { status: 500 },
     )
   }
