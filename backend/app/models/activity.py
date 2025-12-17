@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, Date, Numeric, Float, DateTime, func
+from sqlalchemy import Column, Integer, String, Enum, Date, Numeric, Float, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 import enum
@@ -25,6 +25,10 @@ class Activity(Base):
     status = Column(String(50), nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Optional owner of the activity. If NULL, the activity is global/demo.
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    owner = relationship("User", back_populates="activities")
 
     calendar_entries = relationship("CalendarEntry", back_populates="activity", cascade="all, delete-orphan")
 

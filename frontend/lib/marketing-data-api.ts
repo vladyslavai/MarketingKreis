@@ -1,6 +1,6 @@
 // Marketing Data API Client
-// Use same-origin proxy via Next.js rewrites to send cookies
-import { authFetch } from './auth-client'
+// Uses shared auth-aware fetch helper from ./api
+import { authFetch } from "./api"
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '')
 

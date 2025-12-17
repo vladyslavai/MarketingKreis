@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 import enum
 
 from app.db.base import Base
@@ -21,4 +22,7 @@ class User(Base):
     is_verified = Column(Boolean, nullable=False, server_default="0")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Activities owned by this user
+    activities = relationship("Activity", back_populates="owner")
 

@@ -11,9 +11,10 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: BACKEND_CORS_ORIGINS
-        value: https://kreismarketing.vercel.app
+        # Allow the production frontend (Vercel) and direct backend origin
+        value: https://kreismmmarketing.vercel.app,https://kreismarketing-backend.onrender.com
       - key: ALLOWED_HOSTS
-        value: .onrender.com,.vercel.app,kreismarketing.vercel.app
+        value: .onrender.com,.vercel.app,kreismmmarketing.vercel.app
       - key: COOKIE_SAMESITE
         value: none
       - key: COOKIE_SECURE
