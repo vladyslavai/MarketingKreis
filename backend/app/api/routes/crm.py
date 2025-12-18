@@ -169,6 +169,43 @@ def create_contact(contact: ContactCreate, db: Session = Depends(get_db_session)
     return db_contact
 
 
+@router.put("/contacts/{contact_id}", response_model=ContactOut)
+def update_contact(
+    contact_id: int,
+    payload: ContactUpdate,
+    db: Session = Depends(get_db_session),
+):
+    """
+    Частичное обновление контакта.
+
+    UI работает с полем name, поэтому first_name/last_name мапим обратно в одно поле.
+    """
+    contact = db.get(Contact, contact_id)
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+
+    data = payload.dict(exclude_unset=True)
+
+    # Сконструировать полное имя из first_name / last_name, если они переданы
+    first = data.pop("first_name", None)
+    last = data.pop("last_name", None)
+    if first is not None or last is not None:
+        fname = (first or "").strip()
+        lname = (last or "").strip()
+        full = f"{fname} {lname}".strip() or fname or lname
+        if full:
+            contact.name = full
+
+    for field, value in data.items():
+        if hasattr(contact, field):
+            setattr(contact, field, value)
+
+    db.add(contact)
+    db.commit()
+    db.refresh(contact)
+    return contact
+
+
 @router.post("/deals", response_model=DealOut)
 def create_deal(deal: DealCreate, db: Session = Depends(get_db_session)):
     db_deal = Deal(**deal.dict())
