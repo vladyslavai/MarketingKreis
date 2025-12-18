@@ -1,13 +1,13 @@
 "use client"
 
-import useSWR from 'swr'
-import { authFetch } from '@/lib/api'
+import useSWR from "swr"
+import { requestLocal } from "@/lib/api"
 
 export interface Activity {
   id: string
   title: string
-  category: 'VERKAUFSFOERDERUNG' | 'IMAGE' | 'EMPLOYER_BRANDING' | 'KUNDENPFLEGE'
-  status: 'ACTIVE' | 'PLANNED' | 'COMPLETED' | 'CANCELLED'
+  category: "VERKAUFSFOERDERUNG" | "IMAGE" | "EMPLOYER_BRANDING" | "KUNDENPFLEGE"
+  status: "ACTIVE" | "PLANNED" | "COMPLETED" | "CANCELLED"
   weight?: number
   budgetCHF?: number
   expectedLeads?: number
@@ -20,39 +20,42 @@ export interface Activity {
   updated_at?: string
 }
 
-const fetcher = async (url: string) => {
-  const res = await authFetch(url)
-  if (!res.ok) return []
-  try { return await res.json() } catch { return [] }
+const fetcher = async () => {
+  // Always go through the Next.js proxy so auth cookies are forwarded.
+  return requestLocal<Activity[]>("/api/activities").catch(() => [])
 }
 
 export function useActivitiesApi() {
-  const { data, error, isLoading, mutate } = useSWR('/activities', fetcher, {
+  const { data, error, isLoading, mutate } = useSWR("/api/activities", fetcher, {
     refreshInterval: 0,
     revalidateOnFocus: false,
   })
 
-  const createActivity = async (activity: Omit<Activity, 'id'>) => {
-    const res = await authFetch('/activities', { method: 'POST', body: JSON.stringify(activity) })
-    const newActivity = await res.json().catch(() => null)
-    mutate()
-    return newActivity as Activity | null
+  const createActivity = async (activity: Omit<Activity, "id">) => {
+    const created = await requestLocal<Activity>("/api/activities", {
+      method: "POST",
+      body: JSON.stringify(activity),
+    }).catch(() => null as any)
+    await mutate()
+    return created
   }
 
   const updateActivity = async (id: string, updates: Partial<Activity>) => {
-    const res = await authFetch(`/activities/${id}`, { method: 'PUT', body: JSON.stringify(updates) })
-    const updated = await res.json().catch(() => null)
-    mutate()
-    return updated as Activity | null
+    const updated = await requestLocal<Activity>(`/api/activities/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    }).catch(() => null as any)
+    await mutate()
+    return updated
   }
 
   const deleteActivity = async (id: string) => {
-    await authFetch(`/activities/${id}`, { method: 'DELETE' })
-    mutate()
+    await requestLocal(`/api/activities/${id}`, { method: "DELETE" }).catch(() => null as any)
+    await mutate()
   }
 
   return {
-    activities: data || [],
+    activities: (data as Activity[]) || [],
     isLoading,
     error,
     createActivity,
@@ -66,6 +69,4 @@ export function useActivitiesApi() {
 export default function useActivitiesApiHook() {
   return useActivitiesApi()
 }
-
-
 

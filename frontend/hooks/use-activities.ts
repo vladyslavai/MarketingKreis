@@ -2,26 +2,23 @@
 
 import useSWR from "swr"
 import { type Activity } from "@/components/circle/radial-circle"
-import { authFetch } from "@/lib/api"
+import { requestLocal } from "@/lib/api"
 import { sync } from "@/lib/sync"
 import * as React from "react"
 
-const fetcher = async (url: string) => {
-  const res = await authFetch(url)
-  if (!res.ok) {
-    // In Dev/Preview we не хотим ломать весь UI из-за 500 — просто вернём пустой список.
-    console.error("Failed to load activities", res.status)
-    return []
-  }
+const fetcher = async () => {
   try {
-    return await res.json()
+    // Всегда идём через Next.js proxy /api/activities, чтобы куки авторизации
+    // корректно доходили до бекенда даже в продакшене (Vercel).
+    return await requestLocal<Activity[]>("/api/activities")
   } catch {
+    console.error("Failed to load activities via /api/activities")
     return []
   }
 }
 
 export function useActivities() {
-    const { data, error, isLoading, mutate } = useSWR("/activities", fetcher, {
+    const { data, error, isLoading, mutate } = useSWR("/api/activities", fetcher, {
         refreshInterval: 0,
         revalidateOnFocus: false,
     })
@@ -104,9 +101,10 @@ export function useActivities() {
     })()
 
     const addActivity = React.useCallback(async (activity: Omit<Activity, "id">) => {
-        const res = await authFetch("/activities", { method: "POST", body: JSON.stringify(activity) })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const created = await res.json().catch(() => null)
+        const created = await requestLocal<any>("/api/activities", {
+          method: "POST",
+          body: JSON.stringify(activity),
+        }).catch(() => null)
         // Persist chosen category even if backend normalizes it
         if (created?.id) {
             if ((activity as any).category) setActivityCategory(String(created.id), String((activity as any).category))
@@ -119,9 +117,10 @@ export function useActivities() {
     }, [mutate])
 
     const updateActivity = React.useCallback(async (activityId: string, updates: Partial<Activity>) => {
-        const res = await authFetch(`/activities/${activityId}`, { method: "PUT", body: JSON.stringify(updates) })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const updated = await res.json().catch(() => null)
+        const updated = await requestLocal<any>(`/api/activities/${activityId}`, {
+          method: "PUT",
+          body: JSON.stringify(updates),
+        }).catch(() => null)
         if ((updates as any).category) setActivityCategory(String(activityId), String((updates as any).category))
         if ((updates as any).stage) setActivityStage(String(activityId), String((updates as any).stage))
         if ((updates as any).checklist) setActivityChecklist(String(activityId), (updates as any).checklist as any)
@@ -131,8 +130,7 @@ export function useActivities() {
     }, [mutate])
 
     const deleteActivity = React.useCallback(async (activityId: string) => {
-        const res = await authFetch(`/activities/${activityId}`, { method: "DELETE" })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        await requestLocal(`/api/activities/${activityId}`, { method: "DELETE" }).catch(() => null)
         removeActivityCategory(String(activityId))
         removeActivityStage(String(activityId))
         const cls = loadChecklists()

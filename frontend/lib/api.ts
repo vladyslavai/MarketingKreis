@@ -26,7 +26,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 // This is critical in production (Vercel) so that authentication cookies
 // issued on the frontend domain are sent correctly to the backend via
 // server-side proxies, avoiding 401 "Not authenticated" errors.
-async function requestLocal<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function requestLocal<T>(path: string, init: RequestInit = {}): Promise<T> {
   const url = path.startsWith("/") ? path : "/" + path
   const res = await fetch(url, {
     ...init,

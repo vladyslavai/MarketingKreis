@@ -9,6 +9,8 @@ from app.db.session import get_db_session
 from app.models.upload import Upload
 from app.models.job import Job
 from app.models.activity import Activity, ActivityType
+from app.models.user import User
+from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/uploads", tags=["uploads"]) 
 
@@ -58,6 +60,7 @@ def upload_file(
     file: UploadFile = File(...),
     mapping: Optional[str] = Form(default=None),
     db: Session = Depends(get_db_session),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Accept CSV/Excel file and import rows as Activities.
@@ -168,6 +171,7 @@ def upload_file(
                     expected_output=str(notes) if notes not in (None, "") else None,
                     start_date=start,
                     end_date=end,
+                    owner_id=current_user.id,
                 )
                 db.add(activity)
                 created_count += 1
