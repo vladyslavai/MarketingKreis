@@ -39,18 +39,47 @@ def list_deals(skip: int = 0, limit: int = 100, company_id: Optional[int] = None
     return q.offset(skip).limit(limit).all()
 
 
+def _to_float(value: Any) -> float:
+    try:
+        return float(value or 0)
+    except Exception:
+        return 0.0
+
+
+def _stage(deal: Deal) -> str:
+    return (getattr(deal, "stage", "") or "").lower()
+
+
 @router.get("/stats")
-def get_crm_stats(db: Session = Depends(get_db_session)):
+def get_crm_stats(db: Session = Depends(get_db_session)) -> Dict[str, Any]:
+    """
+    Aggregated CRM stats for dashboard tiles.
+
+    - totalCompanies / totalContacts / totalDeals: простые счётчики
+    - pipelineValue: сумма value по незакрытым сделкам (stage != 'lost')
+    - wonValue: сумма value по выигранным сделкам (stage == 'won')
+    - conversionRate: доля выигранных сделок от всех (в процентах)
+    """
     total_companies = db.query(Company).count()
     total_contacts = db.query(Contact).count()
-    total_deals = db.query(Deal).count()
+
+    deals: List[Deal] = db.query(Deal).all()
+    total_deals = len(deals)
+
+    open_deals = [d for d in deals if _stage(d) not in ("lost",)]
+    won_deals = [d for d in deals if _stage(d) == "won"]
+
+    pipeline_value = sum(_to_float(d.value) for d in open_deals)
+    won_value = sum(_to_float(d.value) for d in won_deals)
+    conversion_rate = (len(won_deals) / total_deals * 100.0) if total_deals > 0 else 0.0
+
     return {
         "totalCompanies": total_companies,
         "totalContacts": total_contacts,
         "totalDeals": total_deals,
-        "pipelineValue": 0,
-        "wonValue": 0,
-        "conversionRate": 0,
+        "pipelineValue": pipeline_value,
+        "wonValue": won_value,
+        "conversionRate": conversion_rate,
     }
 
 
@@ -92,6 +121,32 @@ def create_company(company: CompanyCreate, db: Session = Depends(get_db_session)
     db.commit()
     db.refresh(db_company)
     return db_company
+
+
+@router.put("/companies/{company_id}", response_model=CompanyOut)
+def update_company(
+    company_id: int,
+    payload: CompanyUpdate,
+    db: Session = Depends(get_db_session),
+):
+    """
+    Частичное обновление компании.
+
+    Используется CRM‑формой при редактировании компании.
+    """
+    company = db.get(Company, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    data = payload.dict(exclude_unset=True)
+    for field, value in data.items():
+        # просто обновляем известные поля; схема уже отфильтровала лишнее
+        setattr(company, field, value)
+
+    db.add(company)
+    db.commit()
+    db.refresh(company)
+    return company
 
 
 @router.post("/contacts", response_model=ContactOut)

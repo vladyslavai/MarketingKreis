@@ -165,6 +165,7 @@ def upload_file(
                 activity = Activity(
                     title=str(title),
                     type=_map_category_to_activity_type(str(category)),
+                    category_name=str(category),
                     status=str(status).upper(),
                     budget=float(budget) if budget not in (None, "") else None,
                     weight=float(weight) if weight not in (None, "") else None,

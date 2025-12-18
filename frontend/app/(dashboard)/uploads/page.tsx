@@ -363,7 +363,7 @@ export default function UploadsPage() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip
+                    <Tooltip 
                       contentStyle={{ backgroundColor: "#0f172a", border: "none", borderRadius: 8 }}
                       labelStyle={{ color: "#e5e7eb" }}
                       itemStyle={{ color: "#e5e7eb" }}
@@ -423,51 +423,51 @@ export default function UploadsPage() {
 
       {/* Uploads & Jobs grids */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-white">Hochgeladene Dateien ({uploads.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {uploads.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-300">Keine Dateien hochgeladen</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {uploads.map((upload) => (
+      <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+        <CardHeader>
+          <CardTitle className="text-white">Hochgeladene Dateien ({uploads.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {uploads.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+              <p className="text-slate-300">Keine Dateien hochgeladen</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {uploads.map((upload) => (
                   <div
                     key={upload.id}
                     className="flex items-center justify-between p-4 border border-white/10 rounded-lg bg-white/3 hover:bg-white/10 transition-colors"
                   >
-                    <div className="flex items-center gap-4">
-                      <FileText className="h-8 w-8 text-blue-400" />
-                      <div>
-                        <p className="font-semibold text-white">{upload.original_name}</p>
-                        <p className="text-sm text-slate-300">
-                          {formatFileSize(upload.file_size)} • {upload.file_type}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-400">
-                        {new Date(upload.created_at).toLocaleDateString("de-DE")}
-                      </span>
-                      <Button variant="outline" size="sm" className="border-white/20 text-slate-200">
-                        <Download className="h-4 w-4" />
-                      </Button>
+                  <div className="flex items-center gap-4">
+                    <FileText className="h-8 w-8 text-blue-400" />
+                    <div>
+                      <p className="font-semibold text-white">{upload.original_name}</p>
+                      <p className="text-sm text-slate-300">
+                        {formatFileSize(upload.file_size)} • {upload.file_type}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">
+                        {new Date(upload.created_at).toLocaleDateString("de-DE")}
+                    </span>
+                    <Button variant="outline" size="sm" className="border-white/20 text-slate-200">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Jobs List */}
-        <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-white">Hintergrund-Jobs ({jobs.length})</CardTitle>
+      {/* Jobs List */}
+      <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-white">Hintergrund-Jobs ({jobs.length})</CardTitle>
             <Button
               variant="outline"
               size="sm"
@@ -477,34 +477,34 @@ export default function UploadsPage() {
                 refreshUploads()
               }}
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Aktualisieren
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {jobs.length === 0 ? (
-              <div className="text-center py-12">
-                <Loader2 className="h-16 w-16 text-slate-400 mx-auto mb-4 animate-spin" />
-                <p className="text-slate-300">Keine aktiven Jobs</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {jobs.map((job) => (
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Aktualisieren
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {jobs.length === 0 ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-16 w-16 text-slate-400 mx-auto mb-4 animate-spin" />
+              <p className="text-slate-300">Keine aktiven Jobs</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {jobs.map((job) => (
                   <div
                     key={job.id}
                     className="flex items-center justify-between p-4 border border-white/10 rounded-lg bg-white/3"
                   >
-                    <div>
-                      <p className="font-semibold text-white capitalize">{job.type}</p>
-                      <p className="text-sm text-slate-300">
+                  <div>
+                    <p className="font-semibold text-white capitalize">{job.type}</p>
+                    <p className="text-sm text-slate-300">
                         {new Date(job.created_at).toLocaleString("de-DE")}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
                       {job.progress !== undefined && job.status === "processing" && (
-                        <div className="text-sm text-blue-300">{job.progress}%</div>
-                      )}
-                      <div className="flex items-center gap-1 text-xs font-medium">
+                      <div className="text-sm text-blue-300">{job.progress}%</div>
+                    )}
+                    <div className="flex items-center gap-1 text-xs font-medium">
                         {job.status === "completed" && (
                           <CheckCircle2 className="h-4 w-4 text-green-400" />
                         )}
@@ -525,14 +525,14 @@ export default function UploadsPage() {
                         >
                           {job.status}
                         </span>
-                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
       </div>
     </div>
   )

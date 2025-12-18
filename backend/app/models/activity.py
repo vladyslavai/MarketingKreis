@@ -17,6 +17,8 @@ class Activity(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     type = Column(Enum(ActivityType), nullable=False)
+    # Optional human-readable category name (e.g. user-defined ring like "Product")
+    category_name = Column(String(255), nullable=True)
     budget = Column(Numeric(12, 2), nullable=True)
     expected_output = Column(String(1024), nullable=True)
     weight = Column(Float, nullable=True)

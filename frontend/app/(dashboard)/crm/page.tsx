@@ -341,10 +341,32 @@ export default function CRMPage() {
   const wonDeals = deals.filter((deal: any) => deal.stage === 'won').length
   const conversionRate = deals.length > 0 ? Math.round((wonDeals / deals.length) * 100) : 0
 
-  const filteredCompanies = useMemo(() => companies.filter((company: any) =>
-    String(company.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    String(company.industry || '').toLowerCase().includes(searchQuery.toLowerCase())
-  ), [companies, searchQuery])
+  const filteredCompanies = useMemo(() => {
+    const q = searchQuery.toLowerCase()
+    const hasStatusFilter = filters.includes("Status")
+    const hasIndustryFilter = filters.includes("Branche")
+    const hasOwnerFilter = filters.includes("Owner")
+
+    return companies.filter((company: any) => {
+      const name = String(company.name || "").toLowerCase()
+      const industry = String(company.industry || "").toLowerCase()
+      const owner = String((company as any).owner || "").toLowerCase()
+
+      const matchesSearch = !q || name.includes(q) || industry.includes(q)
+      if (!matchesSearch) return false
+
+      // Simple, easy-to-understand filters:
+      if (hasStatusFilter) {
+        // показываем только активные компании
+        const status = String(company.status || "active").toLowerCase()
+        if (status !== "active" && status !== "hot" && status !== "warm") return false
+      }
+      if (hasIndustryFilter && !industry) return false
+      if (hasOwnerFilter && !owner) return false
+
+      return true
+    })
+  }, [companies, searchQuery, filters])
 
   const filteredContacts = useMemo(() => contacts.filter((contact: any) =>
     String(contact.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||

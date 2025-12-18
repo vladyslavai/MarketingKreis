@@ -68,6 +68,6 @@ export async function PUT(req: NextRequest) {
       { error: e?.message || "Failed to save user categories" },
       { status: 500 },
     )
-  }
+}
 }
 
