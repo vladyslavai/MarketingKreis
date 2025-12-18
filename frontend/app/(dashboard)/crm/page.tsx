@@ -48,6 +48,125 @@ import { CompanyDialog } from "@/components/crm/company-dialog"
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 
+function ContactDetailForm({
+  contact,
+  companies,
+  onClose,
+  onSave,
+}: {
+  contact: any
+  companies: any[]
+  onClose: () => void
+  onSave: (updates: any) => Promise<void>
+}) {
+  const [name, setName] = useState(String(contact.name || ""))
+  const [email, setEmail] = useState(String(contact.email || ""))
+  const [phone, setPhone] = useState(String(contact.phone || ""))
+  const [company, setCompany] = useState(String(contact.company || ""))
+  const [title, setTitle] = useState(String(contact.title || ""))
+  const [saving, setSaving] = useState(false)
+
+  const companyOptions = useMemo(
+    () => companies.map((c: any) => String(c.name || "")).filter(Boolean),
+    [companies],
+  )
+
+  const handleSubmit = async () => {
+    setSaving(true)
+    try {
+      await onSave({
+        name,
+        email,
+        phone,
+        company,
+        title,
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const initials =
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("") || "?"
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start gap-3 mb-2">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-sm font-semibold text-white">
+          {initials}
+        </div>
+        <div>
+          <DialogTitle className="text-base sm:text-lg">{name || "Kontakt"}</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">Kontaktdetails bearbeiten</DialogDescription>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 text-sm">
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-slate-500 dark:text-slate-300">Name</label>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-slate-500 dark:text-slate-300">E-Mail</label>
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-slate-500 dark:text-slate-300">Telefon</label>
+          <Input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-slate-500 dark:text-slate-300">Firma</label>
+          <Input
+            list="contact-company-options"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700"
+          />
+          <datalist id="contact-company-options">
+            {companyOptions.map((name: string) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-slate-500 dark:text-slate-300">Titel / Position</label>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <Button variant="outline" size="sm" onClick={onClose}>
+          Abbrechen
+        </Button>
+        <Button size="sm" onClick={handleSubmit} disabled={saving}>
+          Speichern
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 type Company = any
 type Contact = any
 type Deal = any
@@ -228,6 +347,62 @@ export default function CRMPage() {
         description: "Bitte versuchen Sie es später erneut.",
         variant: "destructive",
       })
+    }
+  }
+
+  const updateContact = async (original: any, updates: any) => {
+    try {
+      const merged = { ...original, ...updates }
+      const trimmed = String(merged.name || "").trim()
+      const [first, ...rest] = trimmed.split(/\s+/)
+      const last = rest.join(" ") || first
+
+      // Resolve company_id by name (best-effort)
+      let companyId: number | undefined = undefined
+      const companyName = String(merged.company || "").trim().toLowerCase()
+      if (companyName) {
+        const match = companies.find((c: any) =>
+          String(c.name || "").trim().toLowerCase() === companyName,
+        )
+        if (match?.id) companyId = Number(match.id)
+      }
+
+      const payload: any = {
+        first_name: first,
+        last_name: last,
+        email: merged.email || undefined,
+        phone: merged.phone || undefined,
+        position: merged.title || undefined,
+        company_id: companyId,
+      }
+
+      const res = await authFetch(`/crm/contacts/${original.id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const detail = await res.text().catch(() => "")
+        console.error("Failed to update contact", res.status, detail)
+        toast({
+          title: "Kontakt konnte nicht aktualisiert werden",
+          description: `Server: ${res.status}`,
+          variant: "destructive",
+        })
+        return false
+      }
+
+      await refreshAll()
+      sync.emit("crm:contacts:changed")
+      toast({ title: "✅ Kontakt aktualisiert" })
+      return true
+    } catch (err) {
+      console.error("updateContact error", err)
+      toast({
+        title: "Fehler beim Aktualisieren des Kontakts",
+        description: "Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      })
+      return false
     }
   }
 
@@ -898,6 +1073,23 @@ export default function CRMPage() {
                   <Button disabled>Bearbeiten (bald)</Button>
                 </div>
               </>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Contact view & edit dialog */}
+        <Dialog open={!!viewingContact} onOpenChange={(o:boolean)=>{ if (!o) setViewingContact(null) }}>
+          <DialogContent className="max-w-lg w-[min(90vw,560px)] bg-white dark:bg-slate-900/80 border-slate-200 dark:border-white/10 backdrop-blur-xl p-6">
+            {viewingContact && (
+              <ContactDetailForm
+                contact={viewingContact}
+                companies={companies}
+                onClose={()=> setViewingContact(null)}
+                onSave={async (updates)=> {
+                  const ok = await updateContact(viewingContact, updates)
+                  if (ok) setViewingContact(null)
+                }}
+              />
             )}
           </DialogContent>
         </Dialog>

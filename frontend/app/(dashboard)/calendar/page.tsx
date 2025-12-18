@@ -23,13 +23,21 @@ export default function CalendarPage() {
   const { events, isLoading, error, createEvent, updateEvent, deleteEvent, refresh, addExceptionDate } = useCalendarApi() as any
   const { openModal } = useModal()
   const [companies, setCompanies] = useState<any[]>([])
+  const [projects, setProjects] = useState<any[]>([])
 
   useEffect(() => {
     ;(async () => {
       try {
-        const res = await fetch(`${apiBase}/crm/companies`, { credentials: "include" })
-        const data = await res.json().catch(() => [])
-        setCompanies(Array.isArray(data) ? data : (data?.items ?? []))
+        const [companiesRes, projectsRes] = await Promise.all([
+          fetch(`${apiBase}/crm/companies`, { credentials: "include" }).catch(() => null),
+          fetch(`${apiBase}/crm/projects`, { credentials: "include" }).catch(() => null),
+        ])
+
+        const companiesData = await (companiesRes ? companiesRes.json().catch(() => []) : [])
+        const projectsData = await (projectsRes ? projectsRes.json().catch(() => []) : [])
+
+        setCompanies(Array.isArray(companiesData) ? companiesData : (companiesData?.items ?? []))
+        setProjects(Array.isArray(projectsData) ? projectsData : (projectsData?.items ?? []))
       } catch {}
     })()
   }, [])
