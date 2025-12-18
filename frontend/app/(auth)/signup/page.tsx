@@ -353,7 +353,7 @@ function SignupInner() {
                     )}
                     {passwordsMatch && (
                       <p className="flex items-center gap-1 text-xs text-emerald-400">
-                        <CheckCircle2 className="h-3 w-3" /> Passwörter stimmen überein
+                        <CheckCircle2 className="h-3 w-3" /> Passwörter stimmen übereин
                       </p>
                     )}
                   </div>
