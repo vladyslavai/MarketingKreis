@@ -406,62 +406,6 @@ export default function CRMPage() {
     }
   }
 
-  const updateContact = async (original: any, updates: any) => {
-    try {
-      const merged = { ...original, ...updates }
-      const trimmed = String(merged.name || "").trim()
-      const [first, ...rest] = trimmed.split(/\s+/)
-      const last = rest.join(" ") || first
-
-      // Resolve company_id by name (best-effort)
-      let companyId: number | undefined = undefined
-      const companyName = String(merged.company || "").trim().toLowerCase()
-      if (companyName) {
-        const match = companies.find((c: any) =>
-          String(c.name || "").trim().toLowerCase() === companyName,
-        )
-        if (match?.id) companyId = Number(match.id)
-      }
-
-      const payload: any = {
-        first_name: first,
-        last_name: last,
-        email: merged.email || undefined,
-        phone: merged.phone || undefined,
-        position: merged.title || undefined,
-        company_id: companyId,
-      }
-
-      const res = await authFetch(`/crm/contacts/${original.id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) {
-        const detail = await res.text().catch(() => "")
-        console.error("Failed to update contact", res.status, detail)
-        toast({
-          title: "Kontakt konnte nicht aktualisiert werden",
-          description: `Server: ${res.status}`,
-          variant: "destructive",
-        })
-        return false
-      }
-
-      await refreshAll()
-      sync.emit("crm:contacts:changed")
-      toast({ title: "✅ Kontakt aktualisiert" })
-      return true
-    } catch (err) {
-      console.error("updateContact error", err)
-      toast({
-        title: "Fehler beim Aktualisieren des Kontakts",
-        description: "Bitte versuchen Sie es später erneut.",
-        variant: "destructive",
-      })
-      return false
-    }
-  }
-
   const addDeal = async () => {
     const e: Record<string,string> = {}
     if (!newDeal.title?.trim()) e.title = 'Deal title is required'
