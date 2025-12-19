@@ -8,7 +8,8 @@ class CompanyBase(BaseModel):
     industry: Optional[str] = Field(None, max_length=100)
     website: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=50)
-    email: Optional[EmailStr] = None
+    # Use plain string here; stricter validation is applied only on input schemas
+    email: Optional[str] = None
     address: Optional[str] = None
     status: Optional[str] = Field("active", pattern="^(active|inactive|prospect)$")
     revenue: Optional[int] = Field(None, ge=0, description="Annual revenue in CHF")
@@ -21,9 +22,23 @@ class CompanyBase(BaseModel):
             raise ValueError('Company name cannot be empty')
         return v.strip()
 
+    @validator("email", pre=True)
+    def normalize_email(cls, v):
+        """
+        Allow empty string in DB / payloads by normalizing it to None
+        before EmailStr validation. This prevents ResponseValidationError
+        when a company has "" stored as email.
+        """
+        if v is None:
+            return None
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
+
 
 class CompanyCreate(CompanyBase):
-    pass
+    # For create payloads, enforce proper email format if provided
+    email: Optional[EmailStr] = None
 
 
 class CompanyUpdate(BaseModel):
@@ -40,6 +55,8 @@ class CompanyUpdate(BaseModel):
 
 
 class CompanyOut(CompanyBase):
+    # Response schema: allow raw string email (already normalized by validator)
+    email: Optional[str] = None
     id: int
     created_at: datetime
     updated_at: datetime
