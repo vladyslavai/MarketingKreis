@@ -101,8 +101,12 @@ function ContactDetailForm({
           {initials}
         </div>
         <div>
-          <DialogTitle className="text-base sm:text-lg">{name || "Kontakt"}</DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm">Kontaktdetails bearbeiten</DialogDescription>
+          <DialogTitle>
+            <span className="text-base sm:text-lg">{name || "Kontakt"}</span>
+          </DialogTitle>
+          <DialogDescription>
+            <span className="text-xs sm:text-sm">Kontaktdetails bearbeiten</span>
+          </DialogDescription>
         </div>
       </div>
 
